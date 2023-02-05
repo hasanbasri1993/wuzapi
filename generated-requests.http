@@ -1,0 +1,19 @@
+###
+POST http://localhost:8081/chat/send/list
+token: 1234ABCD
+Content-Type: application/json
+
+{
+  "Phone": "6282213542319",
+  "Body": "How you doin"
+}
+
+####
+#POST http://localhost:8081/chat/send/text
+#token: 1234ABCD
+#Content-Type: application/json
+#
+#{
+#  "Phone": "6282213542319",
+#  "Body": "How you doin"
+#}

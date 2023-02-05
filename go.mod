@@ -11,7 +11,7 @@ require (
 	github.com/rs/zerolog v1.26.1
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/vincent-petithory/dataurl v1.0.0
-	go.mau.fi/whatsmeow v0.0.0-20221122081206-059049466d44
+	go.mau.fi/whatsmeow v0.0.0-20230204181151-b1f00ea99464
 	google.golang.org/protobuf v1.28.1
 	modernc.org/sqlite v1.16.0
 )
@@ -25,11 +25,11 @@ require (
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/rs/xid v1.3.0 // indirect
-	go.mau.fi/libsignal v0.0.0-20221015105917-d970e7c3c9cf // indirect
-	golang.org/x/crypto v0.0.0-20221012134737-56aed061732a // indirect
+	go.mau.fi/libsignal v0.1.0 // indirect
+	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/mod v0.4.2 // indirect
-	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
-	golang.org/x/sys v0.0.0-20220412211240-33da011f77ad // indirect
+	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/tools v0.1.7 // indirect
 	golang.org/x/xerrors v0.0.0-20220411194840-2f41105eb62f // indirect
 	lukechampine.com/uint128 v1.1.1 // indirect
