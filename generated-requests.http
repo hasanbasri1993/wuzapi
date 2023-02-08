@@ -1,5 +1,33 @@
 ###
-POST http://localhost:8081/chat/send/list
+POST http://localhost:8080/chat/send/list
+token: 1234ABCD
+Content-Type: application/json
+
+{
+  "Phone": "6282213542319",
+  "Title": "How you doin",
+  "Description": "How you doin",
+  "ButtonText": "How you doin",
+  "FooterText": "asdasd asdmb nasdi",
+  "Sections": [
+    {
+      "Title": "How you doin 1",
+      "Rows": [
+        {
+          "Title": "Yes",
+          "Description": "askjhdkjashdkjash"
+        },
+        {
+          "Title": "Yes",
+          "Description": "askjhdkjashdkjash"
+        }
+      ]
+    }
+  ]
+}
+
+###
+POST http://localhost:8081/chat/send/text
 token: 1234ABCD
 Content-Type: application/json
 
@@ -8,12 +36,45 @@ Content-Type: application/json
   "Body": "How you doin"
 }
 
-####
-#POST http://localhost:8081/chat/send/text
-#token: 1234ABCD
-#Content-Type: application/json
-#
-#{
-#  "Phone": "6282213542319",
-#  "Body": "How you doin"
-#}
+###
+POST http://localhost:8081/chat/send/location
+token: 1234ABCD
+Content-Type: application/json
+
+{
+  "Phone": "6282213542319",
+  "Name": "How you doing",
+  "Latitude": 48.85837,
+  "Longitude": 2.294481
+}
+
+###
+POST http://localhost:8081/chat/send/template
+token: 1234ABCD
+Content-Type: application/json
+
+{
+  "Phone": "6282213542319",
+  "Content": "Message title",
+  "Footer": "Text below title, above buttons",
+  "Buttons": [
+    {
+      "DisplayText": "Yes",
+      "Type": "quickreply"
+    },
+    {
+      "DisplayText": "No",
+      "Type": "quickreply"
+    },
+    {
+      "DisplayText": "Visit Site",
+      "Type": "url",
+      "Url": "https://www.fop2.com"
+    },
+    {
+      "DisplayText": "Callme",
+      "Type": "call",
+      "PhoneNumber": "1155553934"
+    }
+  ]
+}

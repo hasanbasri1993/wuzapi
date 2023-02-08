@@ -52,7 +52,6 @@ func (s *server) routes() {
 	s.router.Handle("/chat/send/image", c.Then(s.SendImage())).Methods("POST")
 	s.router.Handle("/chat/send/audio", c.Then(s.SendAudio())).Methods("POST")
 	s.router.Handle("/chat/send/document", c.Then(s.SendDocument())).Methods("POST")
-	//	s.router.Handle("/chat/send/template", c.Then(s.SendTemplate())).Methods("POST")
 	s.router.Handle("/chat/send/video", c.Then(s.SendVideo())).Methods("POST")
 	s.router.Handle("/chat/send/sticker", c.Then(s.SendSticker())).Methods("POST")
 	s.router.Handle("/chat/send/location", c.Then(s.SendLocation())).Methods("POST")
@@ -60,8 +59,9 @@ func (s *server) routes() {
 	s.router.Handle("/chat/react", c.Then(s.React())).Methods("POST")
 	s.router.Handle("/chat/send/button", c.Then(s.SendButtons())).Methods("POST")
 	s.router.Handle("/chat/send/list", c.Then(s.SendLists())).Methods("POST")
+	s.router.Handle("/chat/send/template", c.Then(s.SendTemplate())).Methods("POST")
 
-	s.router.Handle("/user/info", c.Then(s.GetUser())).Methods("GET")
+	s.router.Handle("/user/info", c.Then(s.GetUser())).Methods("POST")
 	s.router.Handle("/user/check", c.Then(s.CheckUser())).Methods("POST")
 	s.router.Handle("/user/avatar", c.Then(s.GetAvatar())).Methods("POST")
 	s.router.Handle("/user/contacts", c.Then(s.GetContacts())).Methods("GET")
@@ -73,8 +73,8 @@ func (s *server) routes() {
 	s.router.Handle("/chat/downloaddocument", c.Then(s.DownloadDocument())).Methods("POST")
 
 	s.router.Handle("/group/list", c.Then(s.ListGroups())).Methods("GET")
-	s.router.Handle("/group/info", c.Then(s.GetGroupInfo())).Methods("GET")
-	s.router.Handle("/group/invitelink", c.Then(s.GetGroupInviteLink())).Methods("GET")
+	s.router.Handle("/group/info", c.Then(s.GetGroupInfo())).Methods("POST")
+	s.router.Handle("/group/invitelink", c.Then(s.GetGroupInviteLink())).Methods("POST")
 	s.router.Handle("/group/photo", c.Then(s.SetGroupPhoto())).Methods("POST")
 	s.router.Handle("/group/name", c.Then(s.SetGroupName())).Methods("POST")
 

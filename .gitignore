@@ -1,12 +1,6 @@
-
-files/
-
-dbdata/
-
-wuzapi.exe
-
-wuzapi
-
 .DS_Store
-
 .idea/
+files/
+dbdata/
+wuzapi.exe
+wuzapi

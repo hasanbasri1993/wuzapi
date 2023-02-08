@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -54,7 +55,12 @@ func (s *server) authalice(next http.Handler) http.Handler {
 				s.Respond(w, r, http.StatusInternalServerError, err)
 				return
 			}
-			defer rows.Close()
+			defer func(rows *sql.Rows) {
+				err := rows.Close()
+				if err != nil {
+					log.Error().Msg(err.Error())
+				}
+			}(rows)
 			for rows.Next() {
 				err = rows.Scan(&txtid, &webhook, &jid, &events)
 				if err != nil {
@@ -112,7 +118,12 @@ func (s *server) auth(handler http.HandlerFunc) http.HandlerFunc {
 				s.Respond(w, r, http.StatusInternalServerError, err)
 				return
 			}
-			defer rows.Close()
+			defer func(rows *sql.Rows) {
+				err := rows.Close()
+				if err != nil {
+					log.Error().Msg(err.Error())
+				}
+			}(rows)
 			for rows.Next() {
 				err = rows.Scan(&txtid, &webhook, &jid, &events)
 				if err != nil {
@@ -290,7 +301,12 @@ func (s *server) GetWebhook() http.HandlerFunc {
 			s.Respond(w, r, http.StatusInternalServerError, errors.New(fmt.Sprintf("Could not get webhook: %v", err)))
 			return
 		}
-		defer rows.Close()
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				log.Error().Msg(err.Error())
+			}
+		}(rows)
 		for rows.Next() {
 			err = rows.Scan(&webhook, &events)
 			if err != nil {
@@ -378,7 +394,12 @@ func (s *server) GetQR() http.HandlerFunc {
 				s.Respond(w, r, http.StatusInternalServerError, err)
 				return
 			}
-			defer rows.Close()
+			defer func(rows *sql.Rows) {
+				err := rows.Close()
+				if err != nil {
+					log.Error().Msg(err.Error())
+				}
+			}(rows)
 			for rows.Next() {
 				err = rows.Scan(&code)
 				if err != nil {
@@ -1141,10 +1162,10 @@ func (s *server) SendLocation() http.HandlerFunc {
 
 	type locationStruct struct {
 		Phone       string
-		Id          string
 		Name        string
 		Latitude    float64
 		Longitude   float64
+		Id          string
 		ContextInfo waProto.ContextInfo
 	}
 
@@ -1154,7 +1175,7 @@ func (s *server) SendLocation() http.HandlerFunc {
 		userid, _ := strconv.Atoi(txtid)
 
 		if clientPointer[userid] == nil {
-			s.Respond(w, r, http.StatusInternalServerError, errors.New("No session"))
+			s.Respond(w, r, http.StatusInternalServerError, errors.New("no session"))
 			return
 		}
 
@@ -1165,19 +1186,19 @@ func (s *server) SendLocation() http.HandlerFunc {
 		var t locationStruct
 		err := decoder.Decode(&t)
 		if err != nil {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Could not decode Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("could not decode Payload"))
 			return
 		}
 		if t.Phone == "" {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Phone in Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Phone in Payload"))
 			return
 		}
 		if t.Latitude == 0 {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Latitude in Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Latitude in Payload"))
 			return
 		}
 		if t.Longitude == 0 {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Longitude in Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Longitude in Payload"))
 			return
 		}
 
@@ -1230,10 +1251,25 @@ func (s *server) SendLocation() http.HandlerFunc {
 // https://github.com/tulir/whatsmeow/issues/305
 func (s *server) SendLists() http.HandlerFunc {
 
-	type textStruct struct {
-		Phone string
-		Body  string
-		Id    string
+	type rowsStruct struct {
+		Id          string
+		Title       string
+		Description string
+	}
+
+	type sectionsStruct struct {
+		Title string
+		Rows  []rowsStruct
+	}
+
+	type listStruct struct {
+		Title       string
+		Description string
+		ButtonText  string
+		Phone       string
+		Sections    []sectionsStruct
+		Id          string
+		FooterText  string
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -1250,7 +1286,7 @@ func (s *server) SendLists() http.HandlerFunc {
 		var resp whatsmeow.SendResponse
 
 		decoder := json.NewDecoder(r.Body)
-		var t textStruct
+		var t listStruct
 		err := decoder.Decode(&t)
 		if err != nil {
 			s.Respond(w, r, http.StatusBadRequest, errors.New("could not decode Payload"))
@@ -1262,8 +1298,23 @@ func (s *server) SendLists() http.HandlerFunc {
 			return
 		}
 
-		if t.Body == "" {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Body in Payload"))
+		if t.Title == "" {
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Title in Payload"))
+			return
+		}
+
+		if t.Description == "" {
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Description in Payload"))
+			return
+		}
+
+		if t.ButtonText == "" {
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing ButtonText in Payload"))
+			return
+		}
+
+		if len(t.Sections) < 1 {
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Sections in Payload"))
 			return
 		}
 
@@ -1279,31 +1330,37 @@ func (s *server) SendLists() http.HandlerFunc {
 			msgid = t.Id
 		}
 
+		var sections []*waProto.ListMessage_Section
+
+		for _, item := range t.Sections {
+			var rows []*waProto.ListMessage_Row
+			id := 1
+			for _, row := range item.Rows {
+				var idtext string
+				if row.Id == "" {
+					idtext = strconv.Itoa(id)
+				} else {
+					idtext = row.Id
+				}
+				rows = append(rows, &waProto.ListMessage_Row{
+					RowId:       proto.String(idtext),
+					Title:       proto.String(row.Title),
+					Description: proto.String(row.Description),
+				})
+			}
+
+			sections = append(sections, &waProto.ListMessage_Section{
+				Title: proto.String(item.Title),
+				Rows:  rows,
+			})
+		}
 		msg1 := &waProto.ListMessage{
-			Title:       proto.String("عمادة القبول والتسجيل"),
-			Description: proto.String("يرجى تحديد سبب التواصل"),
-			ButtonText:  proto.String("أنقر هنا  👈"),
+			Title:       proto.String(t.Title),
+			Description: proto.String(t.Description),
+			ButtonText:  proto.String(t.ButtonText),
 			ListType:    waProto.ListMessage_SINGLE_SELECT.Enum(),
-			Sections: []*waProto.ListMessage_Section{
-				{
-					Title: proto.String("لدي إستفسار بخصوص:"),
-					Rows: []*waProto.ListMessage_Row{
-						{
-							RowId: proto.String("1"),
-							Title: proto.String("عمادة القبول والتسجيل"),
-							//	Description: proto.String("عمادة القبول والتسجيل"),
-						},
-						{
-							RowId: proto.String("2"),
-							Title: proto.String("عمادة شؤون المكتبات"),
-						},
-						{
-							RowId: proto.String("3"),
-							Title: proto.String("مواقع كليات وفروع جامعة الملك خالد"),
-						},
-					},
-				},
-			},
+			Sections:    sections,
+			FooterText:  proto.String(t.FooterText),
 		}
 
 		resp, err = clientPointer[userid].SendMessage(context.Background(), recipient, &waProto.Message{
@@ -1520,8 +1577,7 @@ func (s *server) SendMessage() http.HandlerFunc {
 	}
 }
 
-/*
-// Sends a Template message
+// SendTemplate Sends a Template message
 func (s *server) SendTemplate() http.HandlerFunc {
 
 	type buttonStruct struct {
@@ -1546,45 +1602,45 @@ func (s *server) SendTemplate() http.HandlerFunc {
 		userid, _ := strconv.Atoi(txtid)
 
 		if clientPointer[userid] == nil {
-			s.Respond(w, r, http.StatusInternalServerError, errors.New("No session"))
+			s.Respond(w, r, http.StatusInternalServerError, errors.New("no session"))
 			return
 		}
 
 		msgid := ""
 		var resp whatsmeow.SendResponse
-//var ts time.Time
+		//var ts time.Time
 
 		decoder := json.NewDecoder(r.Body)
 		var t templateStruct
 		err := decoder.Decode(&t)
 		if err != nil {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Could not decode Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("could not decode Payload"))
 			return
 		}
 
 		if t.Phone == "" {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Phone in Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Phone in Payload"))
 			return
 		}
 
 		if t.Content == "" {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Content in Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Content in Payload"))
 			return
 		}
 
 		if t.Footer == "" {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Footer in Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Footer in Payload"))
 			return
 		}
 
 		if len(t.Buttons) < 1 {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Buttons in Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Buttons in Payload"))
 			return
 		}
 
 		recipient, ok := parseJID(t.Phone)
 		if !ok {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Could not parse Phone"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("could not parse Phone"))
 			return
 		}
 
@@ -1609,7 +1665,7 @@ func (s *server) SendTemplate() http.HandlerFunc {
 				}
 				buttons = append(buttons, &waProto.HydratedTemplateButton{
 					HydratedButton: &waProto.HydratedTemplateButton_QuickReplyButton{
-						QuickReplyButton: &waProto.HydratedQuickReplyButton{
+						QuickReplyButton: &waProto.HydratedTemplateButton_HydratedQuickReplyButton{
 							DisplayText: &text,
 							Id:          proto.String(idtext),
 						},
@@ -1620,7 +1676,7 @@ func (s *server) SendTemplate() http.HandlerFunc {
 				url := item.Url
 				buttons = append(buttons, &waProto.HydratedTemplateButton{
 					HydratedButton: &waProto.HydratedTemplateButton_UrlButton{
-						UrlButton: &waProto.HydratedURLButton{
+						UrlButton: &waProto.HydratedTemplateButton_HydratedURLButton{
 							DisplayText: &text,
 							Url:         &url,
 						},
@@ -1631,7 +1687,7 @@ func (s *server) SendTemplate() http.HandlerFunc {
 				phonenumber := item.PhoneNumber
 				buttons = append(buttons, &waProto.HydratedTemplateButton{
 					HydratedButton: &waProto.HydratedTemplateButton_CallButton{
-						CallButton: &waProto.HydratedCallButton{
+						CallButton: &waProto.HydratedTemplateButton_HydratedCallButton{
 							DisplayText: &text,
 							PhoneNumber: &phonenumber,
 						},
@@ -1641,9 +1697,9 @@ func (s *server) SendTemplate() http.HandlerFunc {
 				text := item.DisplayText
 				buttons = append(buttons, &waProto.HydratedTemplateButton{
 					HydratedButton: &waProto.HydratedTemplateButton_QuickReplyButton{
-						QuickReplyButton: &waProto.HydratedQuickReplyButton{
+						QuickReplyButton: &waProto.HydratedTemplateButton_HydratedQuickReplyButton{
 							DisplayText: &text,
-							Id:          proto.String(string(id)),
+							Id:          proto.String(string(rune(id))),
 						},
 					},
 				})
@@ -1651,17 +1707,19 @@ func (s *server) SendTemplate() http.HandlerFunc {
 			id++
 		}
 
-		msg := &waProto.Message{TemplateMessage: &waProto.TemplateMessage{
-			HydratedTemplate: &waProto.HydratedFourRowTemplate{
-				HydratedContentText: proto.String(t.Content),
-				HydratedFooterText:  proto.String(t.Footer),
-				HydratedButtons:     buttons,
-				TemplateId:          proto.String("1"),
-			},
-		},
-		}
+		resp, err = clientPointer[userid].SendMessage(context.Background(), recipient, &waProto.Message{
+			ViewOnceMessage: &waProto.FutureProofMessage{
+				Message: &waProto.Message{TemplateMessage: &waProto.TemplateMessage{
+					HydratedTemplate: &waProto.TemplateMessage_HydratedFourRowTemplate{
+						HydratedContentText: proto.String(t.Content),
+						HydratedFooterText:  proto.String(t.Footer),
+						HydratedButtons:     buttons,
+						TemplateId:          proto.String("1"),
+					},
+				},
+				},
+			}})
 
-		resp, err = clientPointer[userid].SendMessage(context.Background(),recipient, msgid, msg)
 		if err != nil {
 			s.Respond(w, r, http.StatusInternalServerError, errors.New(fmt.Sprintf("Error sending message: %v", err)))
 			return
@@ -1678,8 +1736,8 @@ func (s *server) SendTemplate() http.HandlerFunc {
 		return
 	}
 }
-*/
-// checks if users/phones are on Whatsapp
+
+// CheckUser checks if users/phones are on Whatsapp
 func (s *server) CheckUser() http.HandlerFunc {
 
 	type checkUserStruct struct {
@@ -1763,7 +1821,7 @@ func (s *server) GetUser() http.HandlerFunc {
 		userid, _ := strconv.Atoi(txtid)
 
 		if clientPointer[userid] == nil {
-			s.Respond(w, r, http.StatusInternalServerError, errors.New("No session"))
+			s.Respond(w, r, http.StatusInternalServerError, errors.New("no session"))
 			return
 		}
 
@@ -2640,11 +2698,10 @@ func (s *server) SetGroupName() http.HandlerFunc {
 	}
 }
 
-// Writes JSON response to API clients
+// Respond Writes JSON response to API clients
 func (s *server) Respond(w http.ResponseWriter, r *http.Request, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
-
 	dataenvelope := map[string]interface{}{"code": status}
 	if err, ok := data.(error); ok {
 		dataenvelope["error"] = err.Error()
@@ -2659,7 +2716,6 @@ func (s *server) Respond(w http.ResponseWriter, r *http.Request, status int, dat
 		dataenvelope["success"] = true
 	}
 	data = dataenvelope
-
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		panic("respond: " + err.Error())
 	}
@@ -2669,18 +2725,18 @@ func validateMessageFields(phone string, stanzaid *string, participant *string) 
 
 	recipient, ok := parseJID(phone)
 	if !ok {
-		return types.NewJID("", types.DefaultUserServer), errors.New("Could not parse Phone")
+		return types.NewJID("", types.DefaultUserServer), errors.New("could not parse Phone")
 	}
 
 	if stanzaid != nil {
 		if participant == nil {
-			return types.NewJID("", types.DefaultUserServer), errors.New("Missing Participant in ContextInfo")
+			return types.NewJID("", types.DefaultUserServer), errors.New("missing Participant in ContextInfo")
 		}
 	}
 
 	if participant != nil {
 		if stanzaid == nil {
-			return types.NewJID("", types.DefaultUserServer), errors.New("Missing StanzaId in ContextInfo")
+			return types.NewJID("", types.DefaultUserServer), errors.New("missing StanzaId in ContextInfo")
 		}
 	}
 
