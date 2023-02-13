@@ -7,14 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"mime"
-	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
-	"sync/atomic"
-	"time"
-
 	"github.com/go-resty/resty/v2"
 	"github.com/mdp/qrterminal/v3"
 	"github.com/patrickmn/go-cache"
@@ -27,8 +19,15 @@ import (
 	"go.mau.fi/whatsmeow/types"
 	"go.mau.fi/whatsmeow/types/events"
 	waLog "go.mau.fi/whatsmeow/util/log"
+	_ "google.golang.org/protobuf/proto"
+	"mime"
 	_ "modernc.org/sqlite"
-	//"google.golang.org/protobuf/proto"
+	"os"
+	"strconv"
+	"strings"
+	"sync/atomic"
+	"time"
+	"wuzapi/service/Chatwoot"
 )
 
 // var wlog waLog.Logger
@@ -172,9 +171,9 @@ func (s *server) startClient(userID int, textjid string, token string, subscript
 
 	if *waDebug != "" {
 		dbLog := waLog.Stdout("Database", *waDebug, true)
-		container, err = sqlstore.New("sqlite", "file:./dbdata/main.db?_foreign_keys=on", dbLog)
+		container, err = sqlstore.New("sqlite", "file:./dbdata/main.session?_foreign_keys=on", dbLog)
 	} else {
-		container, err = sqlstore.New("sqlite", "file:./dbdata/main.db?_foreign_keys=on", nil)
+		container, err = sqlstore.New("sqlite", "file:./dbdata/main.session?_foreign_keys=on", nil)
 	}
 	if err != nil {
 		panic(err)
@@ -241,7 +240,6 @@ func (s *server) startClient(userID int, textjid string, token string, subscript
 					// Display QR code in terminal (useful for testing/developing)
 					if *logType != "json" {
 						qrterminal.GenerateHalfBlock(evt.Code, qrterminal.L, os.Stdout)
-						fmt.Println("QR code:\n", evt.Code)
 					}
 					// Store encoded/embeded base64 QR on database for retrieval with the /qr endpoint
 					image, _ := qrcode.Encode(evt.Code, qrcode.Medium, 256)
@@ -312,6 +310,7 @@ func (mycli *MyClient) myEventHandler(rawEvt interface{}) {
 	path := ""
 
 	switch evt := rawEvt.(type) {
+
 	case *events.AppStateSyncComplete:
 		if len(mycli.WAClient.Store.PushName) > 0 && evt.Name == appstate.WAPatchCriticalBlock {
 			err := mycli.WAClient.SendPresence(types.PresenceAvailable)
@@ -405,7 +404,8 @@ func (mycli *MyClient) myEventHandler(rawEvt interface{}) {
 				return
 			}
 			exts, _ := mime.ExtensionsByType(img.GetMimetype())
-			path = fmt.Sprintf("%s/%s%s", userDirectory, evt.Info.ID, exts[0])
+			path = fmt.Sprintf("%s/%s%s", userDirectory, evt.Info.ID, exts[1])
+			fmt.Println(path, exts, evt.Info.ID)
 			err = os.WriteFile(path, data, 0600)
 			if err != nil {
 				log.Error().Err(err).Msg("Failed to save image")
@@ -494,15 +494,8 @@ func (mycli *MyClient) myEventHandler(rawEvt interface{}) {
 				log.Error().Err(err).Msg("Failed to download document")
 				return
 			}
-			extension := ""
-			exts, err := mime.ExtensionsByType(document.GetMimetype())
-			if err != nil {
-				extension = exts[0]
-			} else {
-				filename := document.FileName
-				extension = filepath.Ext(*filename)
-			}
-			path = fmt.Sprintf("%s/%s%s", userDirectory, evt.Info.ID, extension)
+			_, err = mime.ExtensionsByType(document.GetMimetype())
+			path = fmt.Sprintf("%s/%s", userDirectory, *evt.Message.DocumentMessage.Title)
 			err = os.WriteFile(path, data, 0600)
 			if err != nil {
 				log.Error().Err(err).Msg("Failed to save document")
@@ -510,6 +503,13 @@ func (mycli *MyClient) myEventHandler(rawEvt interface{}) {
 			}
 			log.Info().Str("path", path).Msg("Document saved")
 		}
+
+		marshal, err := json.Marshal(postmap)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		Chatwoot.IncomingMessage(string(marshal))
 	case *events.Receipt:
 		postmap["type"] = "ReadReceipt"
 		dowebhook = 1

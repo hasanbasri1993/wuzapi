@@ -15,6 +15,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/patrickmn/go-cache"
 	"github.com/rs/zerolog"
+	"github.com/spf13/viper"
 	_ "modernc.org/sqlite"
 )
 
@@ -49,8 +50,17 @@ func init() {
 
 func main() {
 
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	viper.SetConfigName("config")
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatal().Err(err).Msg(err.Error())
+	}
+
 	dbDirectory := "dbdata"
-	_, err := os.Stat(dbDirectory)
+	_, err = os.Stat(dbDirectory)
 	if os.IsNotExist(err) {
 		errDir := os.MkdirAll(dbDirectory, 0751)
 		if errDir != nil {
@@ -79,6 +89,9 @@ func main() {
 
 	s.connectOnStartup()
 
+	if viper.GetString("server.port") != "" {
+		*port = viper.GetString("server.port")
+	}
 	srv := &http.Server{
 		Addr:    *address + ":" + *port,
 		Handler: s.router,
