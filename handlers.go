@@ -6,18 +6,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"net/http"
-	"os"
-	"strconv"
-	"strings"
-	"time"
-
 	"github.com/patrickmn/go-cache"
+	"github.com/spf13/viper"
 	"github.com/vincent-petithory/dataurl"
 	"go.mau.fi/whatsmeow"
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
 	"google.golang.org/protobuf/proto"
+	"net/http"
+	"os"
+	"strconv"
+	"strings"
+	"time"
+	"wuzapi/model"
+	"wuzapi/service/Chatwoot"
 )
 
 type Values struct {
@@ -731,7 +733,7 @@ func (s *server) SendAudio() http.HandlerFunc {
 	}
 }
 
-// Sends an Image message
+// SendImage Sends an Image message
 func (s *server) SendImage() http.HandlerFunc {
 
 	type imageStruct struct {
@@ -802,7 +804,7 @@ func (s *server) SendImage() http.HandlerFunc {
 				}
 			}
 		} else {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Image data should start with \"data:image/png;base64,\""))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("image data should start with \"data:image/png;base64,\""))
 			return
 		}
 
@@ -1502,77 +1504,47 @@ func (s *server) SendMessage() http.HandlerFunc {
 		userid, _ := strconv.Atoi(txtid)
 
 		if clientPointer[userid] == nil {
-			s.Respond(w, r, http.StatusInternalServerError, errors.New("No session"))
+			s.Respond(w, r, http.StatusInternalServerError, errors.New("no session"))
 			return
 		}
-
-		msgid := ""
-		var resp whatsmeow.SendResponse
 
 		decoder := json.NewDecoder(r.Body)
 		var t textStruct
 		err := decoder.Decode(&t)
 		if err != nil {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Could not decode Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("could not decode Payload"))
 			return
 		}
 
 		if t.Phone == "" {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Phone in Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Phone in Payload"))
 			return
 		}
 
 		if t.Body == "" {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Body in Payload"))
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Body in Payload"))
 			return
 		}
 
-		recipient, err := validateMessageFields(t.Phone, t.ContextInfo.StanzaId, t.ContextInfo.Participant)
-		if err != nil {
-			log.Error().Msg(fmt.Sprintf("%s", err))
-			s.Respond(w, r, http.StatusBadRequest, err)
-			return
-		}
-
-		if t.Id == "" {
-			msgid = whatsmeow.GenerateMessageID()
-		} else {
-			msgid = t.Id
-		}
-
-		//	msg := &waProto.Message{Conversation: &t.Body}
-
-		msg := &waProto.Message{
-			ExtendedTextMessage: &waProto.ExtendedTextMessage{
-				Text: &t.Body,
-			},
-		}
-
-		if t.ContextInfo.StanzaId != nil {
-			msg.ExtendedTextMessage.ContextInfo = &waProto.ContextInfo{
-				StanzaId:      proto.String(*t.ContextInfo.StanzaId),
-				Participant:   proto.String(*t.ContextInfo.Participant),
-				QuotedMessage: &waProto.Message{Conversation: proto.String("")},
+		kode, respon, msgid := SendMessageProcess(t.Phone, t.Body, userid, t.ContextInfo.StanzaId, t.ContextInfo.Participant)
+		if viper.GetString("chatwoot.baseUrl") != "" && kode == http.StatusOK {
+			isGroup := strings.Contains(t.Phone, "@g.us")
+			chat := t.Phone
+			if isGroup {
+				chat = strings.Split(chat, "@")[0]
+				chat = chat[3:]
 			}
+			var oneSenderWebhook model.OneSenderWebhook
+			oneSenderWebhook.Chat = chat
+			oneSenderWebhook.SenderPhone = chat
+			oneSenderWebhook.MessageText = t.Body
+			oneSenderWebhook.MessageType = "text"
+			oneSenderWebhook.IsFromMe = true
+			oneSenderWebhook.IsGroup = isGroup
+			oneSenderWebhook.MessageID = msgid
+			Chatwoot.IncomingMessageApi(oneSenderWebhook)
 		}
-
-		resp, err = clientPointer[userid].SendMessage(context.Background(), recipient, msg)
-		respJson, err := json.Marshal(resp)
-		fmt.Println(string(respJson))
-		if err != nil {
-			s.Respond(w, r, http.StatusInternalServerError, errors.New(fmt.Sprintf("Error sending message: %v", err)))
-			return
-		}
-
-		log.Info().Str("timestamp", fmt.Sprintf("%d", resp.Timestamp)).Str("id", msgid).Msg("Message sent")
-		response := map[string]interface{}{"Details": "Sent", "Timestamp": resp.Timestamp, "Id": msgid}
-		responseJson, err := json.Marshal(response)
-		if err != nil {
-			s.Respond(w, r, http.StatusInternalServerError, err)
-		} else {
-			s.Respond(w, r, http.StatusOK, string(responseJson))
-		}
-
+		s.Respond(w, r, kode, respon)
 		return
 	}
 }
@@ -2695,6 +2667,19 @@ func (s *server) SetGroupName() http.HandlerFunc {
 		}
 
 		return
+	}
+}
+
+func (s *server) Chatwoot() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		decoder := json.NewDecoder(r.Body)
+		var t model.ChatwootWebhook
+		err := decoder.Decode(&t)
+		if err != nil {
+			s.Respond(w, r, http.StatusBadRequest, errors.New("could not decode Payload"))
+			return
+		}
+		Chatwoot.OutcomeChawoot(t)
 	}
 }
 

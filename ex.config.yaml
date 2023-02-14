@@ -1,0 +1,8 @@
+appName: SimpleApp
+server:
+  host: #host application
+  port: 9000
+chatwoot:
+    baseUrl: #baseUrl
+    accountToken: #accountToken
+    forceUpdateCwWebhook: false

@@ -15,11 +15,6 @@ func prosesContact(oneSenderWebhook model.OneSenderWebhook) int {
 	if err != nil {
 		fmt.Println(err)
 	}
-	marshal, err := json.Marshal(oneSenderWebhook)
-	if err != nil {
-		return 0
-	}
-	fmt.Println("oneSenderWebhook", string(marshal))
 	resultContact := searchContact(oneSenderWebhook.Chat)
 	err = json.Unmarshal([]byte(resultContact), &searchContactChatwoot)
 	if err != nil {
@@ -41,13 +36,8 @@ func prosesContact(oneSenderWebhook model.OneSenderWebhook) int {
 			}
 		}
 		dataContact.PhoneNumber = "+" + dataContact.PhoneNumber
-		marshal, err := json.Marshal(dataContact)
-		fmt.Println(string(marshal))
 		resultCreateContact := createContact(dataContact)
-		err = json.Unmarshal([]byte(resultCreateContact), &createContactChatwoot)
-		if err != nil {
-
-		}
+		_ = json.Unmarshal([]byte(resultCreateContact), &createContactChatwoot)
 		idContact = createContactChatwoot.Payload.Contact.ID
 	} else {
 		idContact = searchContactChatwoot.Payload[0].ID

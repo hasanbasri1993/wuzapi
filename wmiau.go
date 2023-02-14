@@ -46,6 +46,7 @@ type MyClient struct {
 
 // Connects to Whatsapp Websocket on server startup if last state was connected
 func (s *server) connectOnStartup() {
+	Chatwoot.SetInbox()
 	rows, err := s.db.Query("SELECT id,token,jid,webhook,events FROM users WHERE connected=1")
 	if err != nil {
 		log.Error().Err(err).Msg("DB Problem")
@@ -111,7 +112,6 @@ func parseJID(arg string) (types.JID, bool) {
 	if arg[0] == '+' {
 		arg = arg[1:]
 	}
-
 	// Basic only digit check for recipient phone number, we want to remove @server and .session
 	phonenumber := ""
 	phonenumber = strings.Split(arg, "@")[0]
@@ -405,7 +405,6 @@ func (mycli *MyClient) myEventHandler(rawEvt interface{}) {
 			}
 			exts, _ := mime.ExtensionsByType(img.GetMimetype())
 			path = fmt.Sprintf("%s/%s%s", userDirectory, evt.Info.ID, exts[1])
-			fmt.Println(path, exts, evt.Info.ID)
 			err = os.WriteFile(path, data, 0600)
 			if err != nil {
 				log.Error().Err(err).Msg("Failed to save image")

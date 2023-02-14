@@ -14,6 +14,9 @@ import (
 )
 
 func praSendMessage(idConversation int, oneSenderWebhook model.OneSenderWebhook) model.SendMessageResult {
+	if strings.Contains(oneSenderWebhook.MessageText, "🤖 _*Chatwoot*_") {
+		return model.SendMessageResult{}
+	}
 	var sendMessageResult model.SendMessageResult
 	dataSendMessage := model.SendMessage{
 		Content:     oneSenderWebhook.MessageText,
@@ -23,11 +26,11 @@ func praSendMessage(idConversation int, oneSenderWebhook model.OneSenderWebhook)
 
 	if oneSenderWebhook.IsFromMe {
 		dataSendMessage.MessageType = "outgoing"
+		dataSendMessage.Private = true
 	}
 
-	if oneSenderWebhook.IsGroup {
-		dataSendMessage.Content =
-			oneSenderWebhook.MessageText + "\n\n\n🤖 **" + oneSenderWebhook.SenderPushName + "**"
+	if oneSenderWebhook.IsGroup && !oneSenderWebhook.IsFromMe {
+		dataSendMessage.Content = oneSenderWebhook.MessageText + "\n\n\n🤖 **" + oneSenderWebhook.SenderPushName + "**"
 	}
 
 	if oneSenderWebhook.MessageType != "text" && oneSenderWebhook.MessageType != "unknown" {

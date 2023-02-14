@@ -28,3 +28,27 @@ func getConfig() (origin string, account string, inbox string, error error) {
 	inboxStr := strSplit[5]
 	return url, accountStr, inboxStr, nil
 }
+
+func SetInbox() {
+	_, _, inbox, err := getConfig()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	//   const updatePayload = {
+	//            "channel": {
+	//                "additional_attributes": {
+	//                    "sessionId": this.client.getSessionId(),
+	//                    "hostAccountNumber": `${this.accountNumber}`,
+	//                    "instanceId": `${this.client.getInstanceId()}`
+	//                }
+	//            }
+	//        }
+	//        if (this.forceUpdateCwWebhook) updatePayload.channel['webhook_url'] = this.expectedSelfWebhookUrl
+	//        const updateInboxPromise = this.cwReq('patch', `inboxes/${this.inboxId}`, updatePayload)
+	if viper.GetString("chatwoot.forceUpdateCwWebhook") == "true" {
+		expectedSelfWebhookUrl := viper.GetString("server.host") + "/chatwoot"
+		payload := `{"channel": {"webhook_url": "` + expectedSelfWebhookUrl + `"}}`
+		requestChatwoot("PATCH", "inboxes/"+inbox, strings.NewReader(payload))
+	}
+}

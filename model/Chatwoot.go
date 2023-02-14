@@ -93,13 +93,13 @@ type ChatwootWebhook struct {
 	ContentAttributes    AdditionalAttributes `json:"content_attributes"`
 	ContentType          string               `json:"content_type"`
 	Content              string               `json:"content"`
-	Conversation         Welcome7Conversation `json:"conversation"`
+	Conversation         Conversation         `json:"conversation"`
 	CreatedAt            string               `json:"created_at"`
 	ID                   int64                `json:"id"`
 	Inbox                Account              `json:"inbox"`
 	MessageType          string               `json:"message_type"`
 	Private              bool                 `json:"private"`
-	Sender               Welcome7Sender       `json:"sender"`
+	Sender               Sender               `json:"sender"`
 	SourceID             interface{}          `json:"source_id"`
 	Event                string               `json:"event"`
 }
@@ -107,7 +107,7 @@ type ChatwootWebhook struct {
 type AdditionalAttributes struct {
 }
 
-type Welcome7Conversation struct {
+type Conversation struct {
 	AdditionalAttributes AdditionalAttributes `json:"additional_attributes"`
 	CanReply             bool                 `json:"can_reply"`
 	Channel              string               `json:"channel"`
@@ -132,7 +132,7 @@ type CustomAttributes struct {
 	IsGroup bool   `json:"is_group"`
 }
 
-type Welcome7Sender struct {
+type Sender struct {
 	ID    int64  `json:"id"`
 	Name  string `json:"name"`
 	Email string `json:"email"`
@@ -153,25 +153,6 @@ type Attachment struct {
 	DataURL   string      `json:"data_url"`
 	ThumbURL  string      `json:"thumb_url"`
 	FileSize  int64       `json:"file_size"`
-}
-
-type Welcome4Conversation struct {
-	CanReply            bool             `json:"can_reply"`
-	Channel             string           `json:"channel"`
-	ContactInbox        ContactInbox     `json:"contact_inbox"`
-	ID                  int64            `json:"id"`
-	InboxID             int64            `json:"inbox_id"`
-	Messages            []Message        `json:"messages"`
-	Labels              []interface{}    `json:"labels"`
-	Meta                Meta             `json:"meta"`
-	Status              string           `json:"status"`
-	CustomAttributes    CustomAttributes `json:"custom_attributes"`
-	SnoozedUntil        interface{}      `json:"snoozed_until"`
-	UnreadCount         int64            `json:"unread_count"`
-	FirstReplyCreatedAt string           `json:"first_reply_created_at"`
-	AgentLastSeenAt     int64            `json:"agent_last_seen_at"`
-	ContactLastSeenAt   int64            `json:"contact_last_seen_at"`
-	Timestamp           int64            `json:"timestamp"`
 }
 
 type ContactInbox struct {
@@ -229,34 +210,13 @@ type Meta struct {
 }
 
 type MetaSender struct {
-	AdditionalAttributes PurpleAdditionalAttributes `json:"additional_attributes"`
-	CustomAttributes     CustomAttributes           `json:"custom_attributes"`
-	Email                string                     `json:"email"`
-	ID                   int64                      `json:"id"`
-	Identifier           interface{}                `json:"identifier"`
-	Name                 string                     `json:"name"`
-	PhoneNumber          string                     `json:"phone_number"`
-	Thumbnail            string                     `json:"thumbnail"`
-	Type                 string                     `json:"type"`
-}
-
-type PurpleAdditionalAttributes struct {
-	Description    string         `json:"description"`
-	CompanyName    string         `json:"company_name"`
-	SocialProfiles SocialProfiles `json:"social_profiles"`
-}
-
-type SocialProfiles struct {
-	Github   string `json:"github"`
-	Twitter  string `json:"twitter"`
-	Facebook string `json:"facebook"`
-	Linkedin string `json:"linkedin"`
-}
-
-type Welcome4Sender struct {
-	ID               int64            `json:"id"`
-	Name             string           `json:"name"`
-	Email            string           `json:"email"`
-	Type             string           `json:"type"`
-	CustomAttributes CustomAttributes `json:"custom_attributes"`
+	AdditionalAttributes AdditionalAttributes `json:"additional_attributes"`
+	CustomAttributes     CustomAttributes     `json:"custom_attributes"`
+	Email                string               `json:"email"`
+	ID                   int64                `json:"id"`
+	Identifier           interface{}          `json:"identifier"`
+	Name                 string               `json:"name"`
+	PhoneNumber          string               `json:"phone_number"`
+	Thumbnail            string               `json:"thumbnail"`
+	Type                 string               `json:"type"`
 }
