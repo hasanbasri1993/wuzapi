@@ -6,3 +6,7 @@ wuzapi.exe
 wuzapi
 
 tmp/
+
+config.yaml
+
+gin-bin

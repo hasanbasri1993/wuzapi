@@ -748,8 +748,6 @@ func (s *server) SendImage() http.HandlerFunc {
 
 		txtid := r.Context().Value("userinfo").(Values).Get("Id")
 		userid, _ := strconv.Atoi(txtid)
-		msgid := ""
-		var resp whatsmeow.SendResponse
 
 		if clientPointer[userid] == nil {
 			s.Respond(w, r, http.StatusInternalServerError, errors.New("No session"))
@@ -773,74 +771,25 @@ func (s *server) SendImage() http.HandlerFunc {
 			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Image in Payload"))
 			return
 		}
-
-		recipient, err := validateMessageFields(t.Phone, t.ContextInfo.StanzaId, t.ContextInfo.Participant)
-		if err != nil {
-			log.Error().Msg(fmt.Sprintf("%s", err))
-			s.Respond(w, r, http.StatusBadRequest, err)
-			return
-		}
-
-		if t.Id == "" {
-			msgid = whatsmeow.GenerateMessageID()
-		} else {
-			msgid = t.Id
-		}
-
-		var uploaded whatsmeow.UploadResponse
-		var filedata []byte
-
-		if t.Image[0:10] == "data:image" {
-			dataURL, err := dataurl.DecodeString(t.Image)
-			if err != nil {
-				s.Respond(w, r, http.StatusBadRequest, errors.New("Could not decode base64 encoded data from payload"))
-				return
-			} else {
-				filedata = dataURL.Data
-				uploaded, err = clientPointer[userid].Upload(context.Background(), filedata, whatsmeow.MediaImage)
-				if err != nil {
-					s.Respond(w, r, http.StatusInternalServerError, errors.New(fmt.Sprintf("Failed to upload file: %v", err)))
-					return
-				}
+		kode, respon, msgid := SendImageProses(t.Phone, t.Caption, t.Image, userid, t.ContextInfo.StanzaId, t.ContextInfo.Participant)
+		if viper.GetString("chatwoot.baseUrl") != "" && kode == http.StatusOK {
+			isGroup := strings.Contains(t.Phone, "@g.us")
+			chat := t.Phone
+			if isGroup {
+				chat = strings.Split(chat, "@")[0]
+				chat = chat[3:]
 			}
-		} else {
-			s.Respond(w, r, http.StatusBadRequest, errors.New("image data should start with \"data:image/png;base64,\""))
-			return
+			var oneSenderWebhook model.OneSenderWebhook
+			oneSenderWebhook.Chat = chat
+			oneSenderWebhook.SenderPhone = chat
+			oneSenderWebhook.MessageText = t.Caption
+			oneSenderWebhook.MessageType = "image"
+			oneSenderWebhook.IsFromMe = true
+			oneSenderWebhook.IsGroup = isGroup
+			oneSenderWebhook.MessageID = msgid
+			Chatwoot.IncomingMessageApi(oneSenderWebhook)
 		}
-
-		msg := &waProto.Message{ImageMessage: &waProto.ImageMessage{
-			Caption:       proto.String(t.Caption),
-			Url:           proto.String(uploaded.URL),
-			DirectPath:    proto.String(uploaded.DirectPath),
-			MediaKey:      uploaded.MediaKey,
-			Mimetype:      proto.String(http.DetectContentType(filedata)),
-			FileEncSha256: uploaded.FileEncSHA256,
-			FileSha256:    uploaded.FileSHA256,
-			FileLength:    proto.Uint64(uint64(len(filedata))),
-		}}
-
-		if t.ContextInfo.StanzaId != nil {
-			msg.ExtendedTextMessage.ContextInfo = &waProto.ContextInfo{
-				StanzaId:      proto.String(*t.ContextInfo.StanzaId),
-				Participant:   proto.String(*t.ContextInfo.Participant),
-				QuotedMessage: &waProto.Message{Conversation: proto.String("")},
-			}
-		}
-
-		resp, err = clientPointer[userid].SendMessage(context.Background(), recipient, msg)
-		if err != nil {
-			s.Respond(w, r, http.StatusInternalServerError, errors.New(fmt.Sprintf("Error sending message: %v", err)))
-			return
-		}
-
-		log.Info().Str("timestamp", fmt.Sprintf("%d", resp.Timestamp)).Str("id", msgid).Msg("Message sent")
-		response := map[string]interface{}{"Details": "Sent", "Timestamp": resp.Timestamp, "Id": msgid}
-		responseJson, err := json.Marshal(response)
-		if err != nil {
-			s.Respond(w, r, http.StatusInternalServerError, err)
-		} else {
-			s.Respond(w, r, http.StatusOK, string(responseJson))
-		}
+		s.Respond(w, r, kode, respon)
 		return
 	}
 }
@@ -2679,7 +2628,7 @@ func (s *server) Chatwoot() http.HandlerFunc {
 			s.Respond(w, r, http.StatusBadRequest, errors.New("could not decode Payload"))
 			return
 		}
-		Chatwoot.OutcomeChawoot(t)
+		OutcomeChawoot(t)
 	}
 }
 

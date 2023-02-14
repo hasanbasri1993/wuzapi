@@ -30,7 +30,7 @@ func preProses(c string) model.OneSenderWebhook {
 	}
 	message := result["event"].(map[string]any)["Message"]
 	info := result["event"].(map[string]any)["Info"].(map[string]any)
-	oneSenderWebhook.Chat = strings.Split(info["Chat"].(string), "@")[0]
+	oneSenderWebhook.Chat = info["Chat"].(string)
 	oneSenderWebhook.Sender = info["Sender"].(string)
 	oneSenderWebhook.SenderPushName = info["PushName"].(string)
 	oneSenderWebhook.SenderPhone = strings.Split(info["Chat"].(string), "@")[0]

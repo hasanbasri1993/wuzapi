@@ -75,8 +75,9 @@ func requestChatwootAttachment(idConversation int, contact model.SendMessage, fi
 	part3, _ := writer.CreatePart(h)
 
 	_, _ = io.Copy(part3, file)
-	_ = writer.WriteField("message_type", "incoming")
+	_ = writer.WriteField("message_type", contact.MessageType)
 	_ = writer.WriteField("content", contact.Content)
+	_ = writer.WriteField("private", strconv.FormatBool(contact.Private))
 
 	err = writer.Close()
 	if err != nil {

@@ -2,21 +2,21 @@ package Chatwoot
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"wuzapi/model"
 )
 
+/*
+Process data before request to Chatwoot API
+*/
 func praSendMessage(idConversation int, oneSenderWebhook model.OneSenderWebhook) model.SendMessageResult {
+	// Will add watermark to message if it's from Chatwoot Admin, prevent duplicate message info Chatwoot Conversation
 	if strings.Contains(oneSenderWebhook.MessageText, "🤖 _*Chatwoot*_") {
 		return model.SendMessageResult{}
 	}
+
 	var sendMessageResult model.SendMessageResult
 	dataSendMessage := model.SendMessage{
 		Content:     oneSenderWebhook.MessageText,
@@ -39,13 +39,19 @@ func praSendMessage(idConversation int, oneSenderWebhook model.OneSenderWebhook)
 		switch oneSenderWebhook.MessageType {
 		case "video":
 			fileName = filebase + ".f4v"
+			break
 		case "document":
 			fileName = "./files/user_1/" + oneSenderWebhook.AttachmentID
+			break
 		case "audio":
 			fileName = filebase + ".oga"
-		default:
+			break
+		case "image":
 			fileName = filebase + ".jpeg"
+			break
 		}
+		jsonD, _ := json.Marshal(dataSendMessage)
+		fmt.Println("requestChatwootAttachment", string(jsonD))
 		resultSendMessage := requestChatwootAttachment(idConversation, dataSendMessage, fileName)
 		err3 := json.Unmarshal([]byte(resultSendMessage), &sendMessageResult)
 		if err3 != nil {
@@ -53,6 +59,8 @@ func praSendMessage(idConversation int, oneSenderWebhook model.OneSenderWebhook)
 			return model.SendMessageResult{}
 		}
 	} else {
+		jsonD, _ := json.Marshal(dataSendMessage)
+		fmt.Println("requestChatwootAttachment", string(jsonD))
 		resultSendMessage := sendMessage(idConversation, dataSendMessage)
 		err3 := json.Unmarshal([]byte(resultSendMessage), &sendMessageResult)
 		if err3 != nil {
@@ -63,12 +71,9 @@ func praSendMessage(idConversation int, oneSenderWebhook model.OneSenderWebhook)
 	return sendMessageResult
 }
 
-func renameF(org string, new string) {
-	e := os.Rename(org, new)
-	if e != nil {
-		log.Fatal(e)
-	}
-}
+/*
+Send message into Chatwoot Conversation
+*/
 func sendMessage(idConversation int, contact model.SendMessage) string {
 	jsonData, err := json.Marshal(contact)
 	if err != nil {
@@ -79,37 +84,4 @@ func sendMessage(idConversation int, contact model.SendMessage) string {
 	method := "POST"
 	payload := strings.NewReader(string(jsonData))
 	return requestChatwoot(method, path, payload)
-}
-
-func downloadFile(URL, fileName string) error {
-	response, err := http.Get(URL)
-	if err != nil {
-		return err
-	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-
-		}
-	}(response.Body)
-
-	if response.StatusCode != 200 {
-		return errors.New("received non 200 response code")
-	}
-	file, err := os.Create(fileName)
-	if err != nil {
-		return err
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-
-		}
-	}(file)
-
-	_, err = io.Copy(file, response.Body)
-	if err != nil {
-		return err
-	}
-	return nil
 }
