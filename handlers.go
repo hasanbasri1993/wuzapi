@@ -1236,7 +1236,7 @@ func (s *server) SendLocation() http.HandlerFunc {
 func (s *server) SendLists() http.HandlerFunc {
 
 	type rowsStruct struct {
-		Id          string
+		RowId       string
 		Title       string
 		Description string
 	}
@@ -1247,13 +1247,13 @@ func (s *server) SendLists() http.HandlerFunc {
 	}
 
 	type listStruct struct {
+		Phone       string
 		Title       string
 		Description string
 		ButtonText  string
-		Phone       string
+		FooterText  string
 		Sections    []sectionsStruct
 		Id          string
-		FooterText  string
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -1272,7 +1272,10 @@ func (s *server) SendLists() http.HandlerFunc {
 		decoder := json.NewDecoder(r.Body)
 		var t listStruct
 		err := decoder.Decode(&t)
+		marshal, _ := json.Marshal(t)
+		fmt.Println(string(marshal))
 		if err != nil {
+			fmt.Println(err)
 			s.Respond(w, r, http.StatusBadRequest, errors.New("could not decode Payload"))
 			return
 		}
@@ -1321,10 +1324,10 @@ func (s *server) SendLists() http.HandlerFunc {
 			id := 1
 			for _, row := range item.Rows {
 				var idtext string
-				if row.Id == "" {
+				if row.RowId == "" {
 					idtext = strconv.Itoa(id)
 				} else {
-					idtext = row.Id
+					idtext = row.RowId
 				}
 				rows = append(rows, &waProto.ListMessage_Row{
 					RowId:       proto.String(idtext),
@@ -1374,10 +1377,15 @@ func (s *server) SendLists() http.HandlerFunc {
 // https://github.com/tulir/whatsmeow/issues/305
 func (s *server) SendButtons() http.HandlerFunc {
 
+	type buttonStruct struct {
+		ButtonId   string
+		ButtonText string
+	}
 	type textStruct struct {
-		Phone string
-		Body  string
-		Id    string
+		Phone   string
+		Title   string
+		Buttons []buttonStruct
+		Id      string
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -1406,8 +1414,17 @@ func (s *server) SendButtons() http.HandlerFunc {
 			return
 		}
 
-		if t.Body == "" {
+		if t.Title == "" {
 			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Body in Payload"))
+			return
+		}
+
+		if len(t.Buttons) < 1 {
+			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Buttons in Payload"))
+			return
+		}
+		if len(t.Buttons) > 3 {
+			s.Respond(w, r, http.StatusBadRequest, errors.New("buttons cant more than 3"))
 			return
 		}
 
@@ -1423,29 +1440,21 @@ func (s *server) SendButtons() http.HandlerFunc {
 			msgid = t.Id
 		}
 
+		var buttons []*waProto.ButtonsMessage_Button
+
+		for _, item := range t.Buttons {
+			buttons = append(buttons, &waProto.ButtonsMessage_Button{
+				ButtonId:       proto.String(item.ButtonId),
+				ButtonText:     &waProto.ButtonsMessage_Button_ButtonText{DisplayText: proto.String(item.ButtonText)},
+				Type:           waProto.ButtonsMessage_Button_RESPONSE.Enum(),
+				NativeFlowInfo: &waProto.ButtonsMessage_Button_NativeFlowInfo{},
+			})
+		}
+
 		msg2 := &waProto.ButtonsMessage{
-			ContentText: proto.String("Pilih tombol dibawah ini:"),
+			ContentText: proto.String(t.Title),
 			HeaderType:  waProto.ButtonsMessage_EMPTY.Enum(),
-			Buttons: []*waProto.ButtonsMessage_Button{
-				{
-					ButtonId:       proto.String("1"),
-					ButtonText:     &waProto.ButtonsMessage_Button_ButtonText{DisplayText: proto.String("Minta Akun")},
-					Type:           waProto.ButtonsMessage_Button_RESPONSE.Enum(),
-					NativeFlowInfo: &waProto.ButtonsMessage_Button_NativeFlowInfo{},
-				},
-				{
-					ButtonId:       proto.String("2"),
-					ButtonText:     &waProto.ButtonsMessage_Button_ButtonText{DisplayText: proto.String("Cek")},
-					Type:           waProto.ButtonsMessage_Button_RESPONSE.Enum(), //proto.ButtonsMessage_Button_Type.Enum,
-					NativeFlowInfo: &waProto.ButtonsMessage_Button_NativeFlowInfo{},
-				},
-				{
-					ButtonId:       proto.String("3"),
-					ButtonText:     &waProto.ButtonsMessage_Button_ButtonText{DisplayText: proto.String("Happy")},
-					Type:           waProto.ButtonsMessage_Button_RESPONSE.Enum(), //proto.ButtonsMessage_Button_Type.Enum,
-					NativeFlowInfo: &waProto.ButtonsMessage_Button_NativeFlowInfo{},
-				},
-			},
+			Buttons:     buttons,
 		}
 
 		resp, err = clientPointer[userid].SendMessage(context.Background(), recipient, &waProto.Message{ViewOnceMessage: &waProto.FutureProofMessage{
