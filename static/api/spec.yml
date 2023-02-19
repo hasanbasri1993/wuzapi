@@ -38,6 +38,26 @@ paths:
             application/json:
               schema:
                 example: { "code": 200, "data": { "webhook": "https://example.net/webhook" }, "success": true }
+  /token:
+    post:
+      tags:
+        - Token
+      summary: Set Token
+      description: Set the Token that will be used to POST information when messages are received
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Token'
+
+      responses:
+        200:
+          description: Response
+          content:
+            application/json:
+              schema:
+                example: { "code": 200, "data": { "Token": "dfgsdfgsdfgsdfg" }, "success": true }
 
   /session/connect:
     post:
@@ -484,14 +504,14 @@ paths:
     post:
       tags:
         - Chat
-      summary: Sends a document message
+      summary: Sends a buttons message
       description: Sends any button message ⚠️ Only work if the sender is online ⚠️
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MessageDocument'
+              $ref: '#/components/schemas/ButtonMessage'
 
       responses:
         200:
@@ -1048,10 +1068,52 @@ components:
           example: FooterText below title, above buttons
         Sections:
           type: object
+          example: [ { "Title": "Section 1","Rows": [ { "Title": "Row 1","Description": "Description 1","RowId": "1" },{ "Title": "Row 2","Description": "Description 2","RowId": "2" } ] },{ "Title": "Section 2","Rows": [ { "Title": "Row 1","Description": "Description 1","RowId": "1" },{ "Title": "Row 2","Description": "Description 2","RowId": "2" } ] } ]
           properties:
+            Title:
+              type: string
+              example: Sections title
             Rows:
               type: object
               example: [ { "Title": "Row 1","Description": "Description 1","RowId": "1" },{ "Title": "Row 2","Description": "Description 2","RowId": "2" } ]
+        Id:
+          type: string
+          example: "ABCDABCD1234"
+        ContextInfo:
+          type: object
+          required:
+            - StanzaId
+            - Participant
+          properties:
+            StanzaId:
+              type: string
+              example: "3EB06F9067F80BAB89FF"
+            Participant:
+              type: string
+              example: "6282213542319@s.whatsapp.net"
+    ButtonMessage:
+      type: object
+      required:
+        - Phone
+        - Title
+        - Buttons
+      properties:
+        Phone:
+          type: string
+          example: "6282213542319"
+        Title:
+          type: string
+          example: "Pilih salah satu"
+        Buttons:
+          type: object
+          example: [ { "ButtonId": "1","ButtonText": "quickreply" }, {"ButtonId": "2","ButtonText": "quickreply" },{ "ButtonId": "3","ButtonText": "quickreply" } ]
+          properties:
+            ButtonId:
+              type: string
+              example: 1
+            ButtonText:
+              type: string
+              example: Minta Akun
         Id:
           type: string
           example: "ABCDABCD1234"
@@ -1110,6 +1172,14 @@ components:
         WebhookURL:
           type: string
           example: http://server/webhook
+    Token:
+      type: object
+      required:
+        - Token
+      properties:
+        Token:
+          type: string
+          example: sdfasdfasdfasdfasdfsadf
   securitySchemes:
     ApiKeyAuth:
       type: apiKey
@@ -1117,4 +1187,4 @@ components:
       name: token
 
 security:
-  - ApiKeyAuth: []
+  - ApiKeyAuth: [ ]

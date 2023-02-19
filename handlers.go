@@ -48,42 +48,36 @@ func (s *server) authalice(next http.Handler) http.Handler {
 			token = strings.Join(r.URL.Query()["token"], "")
 		}
 
-		myuserinfo, found := userinfocache.Get(token)
-		if !found {
-			log.Info().Msg("Looking for user information in DB")
-			// Checks DB from matching user and store user values in context
-			rows, err := s.db.Query("SELECT id,webhook,jid,events FROM users WHERE token=? LIMIT 1", token)
+		log.Info().Msg("Looking for user information in DB")
+		// Checks DB from matching user and store user values in context
+		rows, err := s.db.Query("SELECT id,webhook,jid,events FROM users WHERE token=? LIMIT 1", token)
+		if err != nil {
+			s.Respond(w, r, http.StatusInternalServerError, err)
+			return
+		}
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				log.Error().Msg(err.Error())
+			}
+		}(rows)
+		for rows.Next() {
+			err = rows.Scan(&txtid, &webhook, &jid, &events)
 			if err != nil {
 				s.Respond(w, r, http.StatusInternalServerError, err)
 				return
 			}
-			defer func(rows *sql.Rows) {
-				err := rows.Close()
-				if err != nil {
-					log.Error().Msg(err.Error())
-				}
-			}(rows)
-			for rows.Next() {
-				err = rows.Scan(&txtid, &webhook, &jid, &events)
-				if err != nil {
-					s.Respond(w, r, http.StatusInternalServerError, err)
-					return
-				}
-				userid, _ = strconv.Atoi(txtid)
-				v := Values{map[string]string{
-					"Id":      txtid,
-					"Jid":     jid,
-					"Webhook": webhook,
-					"Token":   token,
-					"Events":  events,
-				}}
+			userid, _ = strconv.Atoi(txtid)
+			v := Values{map[string]string{
+				"Id":      txtid,
+				"Jid":     jid,
+				"Webhook": webhook,
+				"Token":   token,
+				"Events":  events,
+			}}
 
-				userinfocache.Set(token, v, cache.NoExpiration)
-				ctx = context.WithValue(r.Context(), "userinfo", v)
-			}
-		} else {
-			ctx = context.WithValue(r.Context(), "userinfo", myuserinfo)
-			userid, _ = strconv.Atoi(myuserinfo.(Values).Get("Id"))
+			userinfocache.Set(token, v, cache.NoExpiration)
+			ctx = context.WithValue(r.Context(), "userinfo", v)
 		}
 
 		if userid == 0 {
@@ -365,6 +359,45 @@ func (s *server) SetWebhook() http.HandlerFunc {
 		userinfocache.Set(token, v, cache.NoExpiration)
 
 		response := map[string]interface{}{"webhook": webhook}
+		responseJson, err := json.Marshal(response)
+		if err != nil {
+			s.Respond(w, r, http.StatusInternalServerError, err)
+		} else {
+			s.Respond(w, r, http.StatusOK, string(responseJson))
+		}
+		return
+	}
+}
+
+func (s *server) SetToken() http.HandlerFunc {
+	type webhookStruct struct {
+		Token string
+	}
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		txtid := r.Context().Value("userinfo").(Values).Get("Id")
+		token := r.Context().Value("userinfo").(Values).Get("Token")
+		userid, _ := strconv.Atoi(txtid)
+
+		decoder := json.NewDecoder(r.Body)
+		var t webhookStruct
+		err := decoder.Decode(&t)
+		if err != nil {
+			s.Respond(w, r, http.StatusInternalServerError, errors.New(fmt.Sprintf("Could not set webhook: %v", err)))
+			return
+		}
+		var tokenNew = t.Token
+
+		_, err = s.db.Exec("UPDATE users SET token=? WHERE id=?", tokenNew, userid)
+		if err != nil {
+			s.Respond(w, r, http.StatusInternalServerError, errors.New(fmt.Sprintf("%s", err)))
+			return
+		}
+
+		v := updateUserInfo(r.Context().Value("userinfo"), "Token", tokenNew)
+		userinfocache.Set(token, v, cache.NoExpiration)
+
+		response := map[string]interface{}{"token": tokenNew}
 		responseJson, err := json.Marshal(response)
 		if err != nil {
 			s.Respond(w, r, http.StatusInternalServerError, err)
