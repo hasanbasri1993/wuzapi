@@ -280,6 +280,7 @@ func (s *server) startClient(userID int, textjid string, token string, subscript
 		if err != nil {
 			panic(err)
 		}
+		go worker()
 	}
 
 	// Keep connected client live until disconnected/killed
@@ -516,12 +517,18 @@ func (mycli *MyClient) myEventHandler(rawEvt interface{}) {
 			log.Info().Strs("id", evt.MessageIDs).Str("source", evt.SourceString()).Str("timestamp", fmt.Sprintf("%d", evt.Timestamp)).Msg("Message was read")
 			if evt.Type == events.ReceiptTypeRead {
 				postmap["state"] = "Read"
+				for _, each := range evt.MessageIDs {
+					receipt(each, "read", evt.Timestamp)
+				}
 			} else {
 				postmap["state"] = "ReadSelf"
 			}
 		} else if evt.Type == events.ReceiptTypeDelivered {
 			postmap["state"] = "Delivered"
 			log.Info().Str("id", evt.MessageIDs[0]).Str("source", evt.SourceString()).Str("timestamp", fmt.Sprintf("%d", evt.Timestamp)).Msg("Message delivered")
+			for _, each := range evt.MessageIDs {
+				receipt(each, "delivered", evt.Timestamp)
+			}
 		} else {
 			// Discard webhooks for inactive or other delivery types
 			return

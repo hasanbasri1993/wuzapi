@@ -19,6 +19,7 @@ import (
 	"strings"
 	"time"
 	"wuzapi/model"
+	"wuzapi/module/wamd"
 	"wuzapi/service/Chatwoot"
 )
 
@@ -1485,6 +1486,7 @@ func (s *server) SendMessage() http.HandlerFunc {
 	type textStruct struct {
 		Phone       string
 		Body        string
+		Priority    int
 		Id          string
 		ContextInfo waProto.ContextInfo
 	}
@@ -1516,26 +1518,14 @@ func (s *server) SendMessage() http.HandlerFunc {
 			s.Respond(w, r, http.StatusBadRequest, errors.New("missing Body in Payload"))
 			return
 		}
-
-		kode, respon, msgid := SendMessageProcess(t.Phone, t.Body, userid, t.ContextInfo.StanzaId, t.ContextInfo.Participant)
-		if viper.GetString("chatwoot.baseUrl") != "" && kode == http.StatusOK {
-			isGroup := strings.Contains(t.Phone, "@g.us")
-			chat := t.Phone
-			if isGroup {
-				chat = strings.Split(chat, "@")[0]
-				chat = chat[3:]
-			}
-			var oneSenderWebhook model.OneSenderWebhook
-			oneSenderWebhook.Chat = chat
-			oneSenderWebhook.SenderPhone = chat
-			oneSenderWebhook.MessageText = t.Body
-			oneSenderWebhook.MessageType = "text"
-			oneSenderWebhook.IsFromMe = true
-			oneSenderWebhook.IsGroup = isGroup
-			oneSenderWebhook.MessageID = msgid
-			Chatwoot.IncomingMessageApi(oneSenderWebhook)
+		if t.Priority == 0 {
+			t.Priority = 100
 		}
-		s.Respond(w, r, kode, respon)
+
+		wamd.AddSendMessageText(t.Phone, t.Body, t.Priority)
+		response := map[string]interface{}{"Details": "Add to queue"}
+		responseJson, _ := json.Marshal(response)
+		s.Respond(w, r, http.StatusOK, string(responseJson))
 		return
 	}
 }
