@@ -1,151 +1,1518 @@
-<!-- ?xml version='1.0' encoding='UTF-8'? -->
-<link href="/github-markdown-css/github-css.css" rel="stylesheet"/>
-<meta charset="utf-8" content="text/html"/>
-<div class="gist">
-<style class="formula-style">
-        svg.gh-md-to-html-formula {
-            fill: black;
+<!doctype html>
+<html lang="en">
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.8/semantic.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.4/css/dataTables.semanticui.min.css">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.4/js/dataTables.semanticui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fomantic-ui/2.8.8/semantic.min.js"></script>
+    <script src="https://unpkg.com/vue@3.2.47/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/axios@1.1.2/dist/axios.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <title>Whatsapp Web Multi</title>
+
+    <style>
+        .container {
+            padding-top: 2em;
         }
     </style>
-<div class="gist-file"> <!-- This is the class that is responsible for the boxing! -->
-<div class="gist-data">
-<div class="js-gist-file-update-container js-task-list-container file-box">
-<div class="file" id="user-content-article-README">
-<div class="Box-body readme blob js-code-block-container p-5 p-xl-6" id="user-content-file-docker-image-pull-md-readme" style="margin-left: 40px; margin-right: 40px; margin-top: 20px; margin-bottom: 20px">
-<article class="markdown-body entry-content container-lg" itemprop="text">
-<h1 id="user-content-wuzapi">
-<a aria-hidden="true" class="anchor" href="#user-content-wuzapi" id="user-content-wuzapi" name="user-content-wuzapi"><span aria-hidden="true" class="octicon octicon-link"></span></a>WUZAPI</h1>
-<p><a href="/images/favicon.png" rel="noopener noreferrer" target="_blank"><img data-canonical-src="/images/favicon.png" src="/images/favicon.png" style="max-width:100%; max-height: 512px;" width="30"/></a> WuzAPI is an implementation
-of <a href="https://github.com/tulir/whatsmeow">@tulir/whatsmeow</a> library as a
-simple RESTful API service with multiple device support and concurrent
-sessions.</p>
-<p>Whatsmeow does not use Puppeteer on headless Chrome, nor an Android emulator.
-It talks directly to WhatsApp websocket servers, thus is quite fast and uses
-much less memory and CPU than those solutions. The drawback is that a change
-in the WhatsApp protocol could break connections and will require a library
-update.</p>
-<h2 id="user-content-ezf3weaa2uhg9u52fwkic-warning">
-<a aria-hidden="true" class="anchor" href="#user-content-ezf3weaa2uhg9u52fwkic-warning" id="user-content-ezf3weaa2uhg9u52fwkic-warning" name="user-content-ezf3weaa2uhg9u52fwkic-warning"><span aria-hidden="true" class="octicon octicon-link"></span></a>⚠️ Warning</h2>
-<p><strong>Using this software violating WhatsApp ToS can get your number banned</strong>:
-Be very careful, do not use this to send SPAM or anything like it. Use at
-your own risk. If you need to develop something with commercial interest
-you should contact a WhatsApp global solution provider and sign up for the
-Whatsapp Business API service instead.</p>
-<h2 id="user-content-available-endpoints">
-<a aria-hidden="true" class="anchor" href="#user-content-available-endpoints" id="user-content-available-endpoints" name="user-content-available-endpoints"><span aria-hidden="true" class="octicon octicon-link"></span></a>Available endpoints</h2>
-<ul>
-<li>Session: connect, disconnect and logout from WhatsApp. Retrieve
-connection status. Retrieve QR code for scanning.</li>
-<li>Messages: send text, image, audio, document, template, video, sticker,
-location and contact messages.</li>
-<li>Users: check if phones have whatsapp, get user information, get user avatar,
-retrieve full contact list.</li>
-<li>Chat: set presence (typing/paused,recording media), mark messages as read,
-download images from messages.</li>
-<li>Groups: list subscribed, get info, get invite links, change photo and name.</li>
-<li>Webhooks: set and get webhook that will be called whenever an event/message
-are received.</li>
-</ul>
-<h2 id="user-content-prerequisites">
-<a aria-hidden="true" class="anchor" href="#user-content-prerequisites" id="user-content-prerequisites" name="user-content-prerequisites"><span aria-hidden="true" class="octicon octicon-link"></span></a>Prerequisites</h2>
-<p>Packages:</p>
-<ul>
-<li>Go (Go Programming Language)</li>
-</ul>
-<p>Optional:</p>
-<ul>
-<li>Docker (Containerization)</li>
-</ul>
-<h2 id="user-content-building">
-<a aria-hidden="true" class="anchor" href="#user-content-building" id="user-content-building" name="user-content-building"><span aria-hidden="true" class="octicon octicon-link"></span></a>Building</h2>
-<pre><code>go build .
-</code></pre>
-<h2 id="user-content-run">
-<a aria-hidden="true" class="anchor" href="#user-content-run" id="user-content-run" name="user-content-run"><span aria-hidden="true" class="octicon octicon-link"></span></a>Run</h2>
-<p>By default it will start a REST service in port 8080. These are the parameters
-you can use to alter behaviour</p>
-<ul>
-<li>-address  : sets the IP address to bind the server to (default 0.0.0.0)</li>
-<li>-port  : sets the port number (default 8080)</li>
-<li>-logtype : format for logs, either console (default) or json</li>
-<li>-wadebug : enable whatsmeow debug, either INFO or DEBUG levels are suported</li>
-<li>-sslcertificate : SSL Certificate File</li>
-<li>-sslprivatekey : SSL Private Key File</li>
-</ul>
-<p>Example:</p>
-<pre><code>./wuzapi -logtype json
-</code></pre>
-<h2 id="user-content-usage">
-<a aria-hidden="true" class="anchor" href="#user-content-usage" id="user-content-usage" name="user-content-usage"><span aria-hidden="true" class="octicon octicon-link"></span></a>Usage</h2>
-<p>In order to open up sessions, you first need to create a user and set an
-authentication token for it. You can do so by updating the SQLite <em>users.db</em>
-database:</p>
-<pre><code>sqlite3 dbdata/users.db "insert into users ('name','token') values ('John','1234ABCD')" 
-</code></pre>
-<p>Once you have some users created, you can talk to the API passing the <strong>Token</strong>
-header as a simple means of authentication. You can have several users
-(different numbers), on the same server.</p>
-<p>The daemon also serves some static web files, useful for development/testing
-that you can load with your browser:</p>
-<ul>
-<li>An API swagger reference in <a href="/api">/api</a> A sample web page to connect and</li>
-<li>scan QR codes in <a href="/login">/login</a> (where you will need to pass
-?token=1234ABCD)</li>
-</ul>
-<h2 id="user-content-api-reference">
-<a aria-hidden="true" class="anchor" href="#user-content-api-reference" id="user-content-api-reference" name="user-content-api-reference"><span aria-hidden="true" class="octicon octicon-link"></span></a>API reference</h2>
-<p>API calls should be made with content type json, and parameters sent into the
-request body, always passing the Token header for authenticating the request.</p>
-<p>Check the Swagger <a href="/api">API Reference</a></p>
-<h2 id="user-content-license">
-<a aria-hidden="true" class="anchor" href="#user-content-license" id="user-content-license" name="user-content-license"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h2>
-<p>Copyright © 2022 Nicolás Gudiño</p>
-<p><a href="https://choosealicense.com/licenses/mit/" rel="nofollow">MIT</a></p>
-<p>Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:</p>
-<p>The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.</p>
-<p>THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.</p>
-<h2 id="user-content-icon-attribution">
-<a aria-hidden="true" class="anchor" href="#user-content-icon-attribution" id="user-content-icon-attribution" name="user-content-icon-attribution"><span aria-hidden="true" class="octicon octicon-link"></span></a>Icon Attribution</h2>
-<p><a href="https://www.flaticon.com/free-icons/communication" rel="nofollow">Communication icons created by Vectors Market -
-Flaticon</a></p>
-<h2 id="user-content-legal">
-<a aria-hidden="true" class="anchor" href="#user-content-legal" id="user-content-legal" name="user-content-legal"><span aria-hidden="true" class="octicon octicon-link"></span></a>Legal</h2>
-<p>This code is in no way affiliated with, authorized, maintained, sponsored or
-endorsed by WhatsApp or any of its affiliates or subsidiaries. This is an
-independent and unofficial software. Use at your own risk.</p>
-<h2 id="user-content-cryptography-notice">
-<a aria-hidden="true" class="anchor" href="#user-content-cryptography-notice" id="user-content-cryptography-notice" name="user-content-cryptography-notice"><span aria-hidden="true" class="octicon octicon-link"></span></a>Cryptography Notice</h2>
-<p>This distribution includes cryptographic software. The country in which you
-currently reside may have restrictions on the import, possession, use, and/or
-re-export to another country, of encryption software. BEFORE using any
-encryption software, please check your country's laws, regulations and policies
-concerning the import, possession, or use, and re-export of encryption
-software, to see if this is permitted. See
-<a href="http://www.wassenaar.org/" rel="nofollow">http://www.wassenaar.org/</a> for more information.</p>
-<p>The U.S. Government Department of Commerce, Bureau of Industry and Security
-(BIS), has classified this software as Export Commodity Control Number (ECCN)
-5D002.C.1, which includes information security software using or performing
-cryptographic functions with asymmetric algorithms. The form and manner of this
-distribution makes it eligible for export under the License Exception ENC
-Technology Software Unrestricted (TSU) exception (see the BIS Export
-Administration Regulations, Section 740.13) for both object code and source
-code.</p>
-</article>
+</head>
+<body>
+<div class="ui container" id="app">
+    <h1 class="ui header center aligned">[[ app_name ]]</h1>
+
+    <div class="ui success message" v-if="connected_devices != null">
+        <div class="header">
+            Device has connected
+        </div>
+        <p>
+            Device ID: <b>[[ connected_devices[0].device ]]</b>
+        </p>
+    </div>
+
+    <div class="ui horizontal divider">
+        App
+    </div>
+
+    <div class="ui three column stackable grid cards">
+        <div class="green card" @click="loginModal" style="cursor: pointer">
+            <div class="content">
+                <div class="header">Login</div>
+                <div class="description">
+                    Scan your QRCode and you can use all this API feature
+                </div>
+            </div>
+        </div>
+        <div class="green card" @click="logoutProcess" style="cursor: pointer">
+            <div class="content">
+                <div class="header">Logout</div>
+                <div class="description">
+                    Remove your login session in application
+                </div>
+            </div>
+        </div>
+        <div class="green card" @click="reconnectProcess" style="cursor: pointer">
+            <div class="content">
+                <div class="header">Reconnect</div>
+                <div class="description">
+                    Reconnect to whatsapp server, please do this if your api doesn't work or your application is down or
+                    restart
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ui horizontal divider">
+        Send
+    </div>
+
+    <div class="ui three column doubling grid cards">
+        <div class="blue card" @click="sendMessageModal()" style="cursor: pointer">
+            <div class="content">
+                <a class="ui blue right ribbon label">Send</a>
+                <div class="header">Send Message</div>
+                <div class="description">
+                    Send any message to any whatsapp number
+                </div>
+            </div>
+        </div>
+        <div class="blue card" @click="sendImageModal()" style="cursor:pointer;">
+            <div class="content">
+                <a class="ui blue right ribbon label">Send</a>
+                <div class="header">Send Image</div>
+                <div class="description">
+                    Send image with
+                    <div class="ui blue horizontal label">jpg/jpeg/png</div>
+                    type
+                </div>
+            </div>
+        </div>
+        <div class="blue card" @click="sendFileModal()" style="cursor: pointer">
+            <div class="content">
+                <a class="ui blue right ribbon label">Send</a>
+                <div class="header">Send File</div>
+                <div class="description">
+                    Send any file up to
+                    <div class="ui blue horizontal label">{{ .MaxFileSize }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="blue card" @click="sendVideoModal()" style="cursor: pointer">
+            <div class="content">
+                <a class="ui blue right ribbon label">Send</a>
+                <div class="header">Send Video</div>
+                <div class="description">
+                    Send video
+                    <div class="ui blue horizontal label">mp4</div>
+                    up to
+                    <div class="ui blue horizontal label">{{ .MaxVideoSize }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="blue card" @click="sendContactModal()" style="cursor: pointer">
+            <div class="content">
+                <a class="ui blue right ribbon label">Send</a>
+                <div class="header">Send Contact</div>
+                <div class="description">
+                    Send contact to any whatsapp number
+                </div>
+            </div>
+        </div>
+        <div class="blue card" @click="sendLocationModal()" style="cursor: pointer">
+            <div class="content">
+                <a class="ui blue right ribbon label">Send</a>
+                <div class="header">Send Location</div>
+                <div class="description">
+                    Send location to any whatsapp number
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="ui horizontal divider">
+        Message
+    </div>
+
+    <div class="ui horizontal divider">
+        Account
+    </div>
+
+    <div class="ui four column doubling grid cards">
+        <div class="green card" @click="avatarModal" style="cursor: pointer;">
+            <div class="content">
+                <div class="header">Avatar</div>
+                <div class="description">
+                    You can search someone avatar by phone
+                </div>
+            </div>
+        </div>
+        <div class="green card" @click="infoModal" style="cursor: pointer;">
+            <div class="content">
+                <div class="header">User Info</div>
+                <div class="description">
+                    You can search someone user info by phone
+                </div>
+            </div>
+        </div>
+        <div class="green card" @click="groupModal" style="cursor: pointer">
+            <div class="content">
+                <div class="header">My List Groups</div>
+                <div class="description">
+                    Display all groups you joined
+                </div>
+            </div>
+        </div>
+        <div class="green card" @click="privacyModal" style="cursor: pointer">
+            <div class="content">
+                <div class="header">My Privacy Setting</div>
+                <div class="description">
+                    Get your privacy settings
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!--  Modal Login  -->
+    <div class="ui small modal" id="modalLogin">
+        <i class="close icon"></i>
+        <div class="header">
+            Login Whatsapp
+        </div>
+        <div class="image content">
+            <div class="ui medium image">
+                <img :src="login_link" alt="qrCodeLogin">
+            </div>
+            <div class="description">
+                <div class="ui header">Please scan to connect</div>
+                <p>Open Setting > Linked Devices > Link Device</p>
+                <div style="padding-top: 50px;">
+                    <i>Refresh QR Code in [[ login_duration_sec ]] seconds to avoid link expiration</i>
+                </div>
+            </div>
+        </div>
+        <div class="actions">
+            <div class="ui approve positive right labeled icon button" @click="loginApiGetQrCode">
+                Refresh QR Code
+                <i class="refresh icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!--  Modal SendMessage  -->
+    <div class="ui small modal" id="modalSendMessage">
+        <i class="close icon"></i>
+        <div class="header">
+            Send Message
+        </div>
+        <div class="content">
+            <form class="ui form">
+                <div class="field">
+                    <label>Type</label>
+                    <select name="message_type" v-model="message_type" aria-label="type">
+                        <option value="group">Group Message</option>
+                        <option value="user">Private Message</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Phone / Group ID</label>
+                    <input v-model="message_phone" type="text" placeholder="6289..."
+                           aria-label="phone">
+                    <input :value="message_phone_id" disabled aria-label="whatsapp_id">
+                </div>
+                <div class="field">
+                    <label>Message</label>
+                    <textarea v-model="message_text" type="text" placeholder="Hello this is message text"
+                              aria-label="message"></textarea>
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui approve positive right labeled icon button" :class="{'loading': this.message_loading}"
+                 @click="sendMessageProcess">
+                Send
+                <i class="send icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!--  Modal SendImage  -->
+    <div class="ui small modal" id="modalSendImage">
+        <i class="close icon"></i>
+        <div class="header">
+            Send Image
+        </div>
+        <div class="content">
+            <form class="ui form">
+                <div class="field">
+                    <label>Type</label>
+                    <select name="image_type" v-model="image_type" aria-label="type">
+                        <option value="group">Group Message</option>
+                        <option value="user">Private Message</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Phone / Group ID</label>
+                    <input v-model="image_phone" type="text" placeholder="6289..."
+                           aria-label="phone">
+                    <input :value="image_phone_id" disabled aria-label="whatsapp_id">
+                </div>
+                <div class="field">
+                    <label>Caption</label>
+                    <textarea v-model="image_caption" type="text" placeholder="Hello this is image caption"
+                              aria-label="caption"></textarea>
+                </div>
+                <div class="field">
+                    <label>View Once</label>
+                    <div class="ui toggle checkbox">
+                        <input type="checkbox" aria-label="view once" v-model="image_view_once">
+                        <label>Check for enable one time view</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Compress</label>
+                    <div class="ui toggle checkbox">
+                        <input type="checkbox" aria-label="compress" v-model="image_compress">
+                        <label>Check for compressing image to smaller size</label>
+                    </div>
+                </div>
+                <div class="field" style="padding-bottom: 30px">
+                    <label>Image</label>
+                    <input type="file" class="inputfile" id="image_file" style="display: none"
+                           accept="image/png,image/jpg,image/jpeg"/>
+                    <label for="image_file" class="ui positive medium green left floated button" style="color: white">
+                        <i class="ui upload icon"></i>
+                        Upload image
+                    </label>
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui approve positive right labeled icon button" :class="{'loading': this.image_loading}"
+                 @click="sendImageProcess">
+                Send
+                <i class="send icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!--  Modal SendFile  -->
+    <div class="ui small modal" id="modalSendFile">
+        <i class="close icon"></i>
+        <div class="header">
+            Send File
+        </div>
+        <div class="content">
+            <form class="ui form">
+                <div class="field">
+                    <label>Type</label>
+                    <select name="file_type" v-model="file_type" aria-label="type">
+                        <option value="group">Group Message</option>
+                        <option value="user">Private Message</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Phone / Group ID</label>
+                    <input v-model="file_phone" type="text" placeholder="6289..."
+                           aria-label="phone">
+                    <input :value="file_phone_id" disabled aria-label="whatsapp_id">
+                </div>
+                <div class="field">
+                    <label>Caption</label>
+                    <textarea v-model="file_caption" type="text" placeholder="Type some caption (optional)..."
+                              aria-label="caption"></textarea>
+                </div>
+                <div class="field" style="padding-bottom: 30px">
+                    <label>File</label>
+                    <input type="file" class="inputfile" id="file_file" style="display: none"/>
+                    <label for="file_file" class="ui positive medium green left floated button" style="color: white">
+                        <i class="ui upload icon"></i>
+                        Upload file
+                    </label>
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui approve positive right labeled icon button" :class="{'loading': this.file_loading}"
+                 @click="sendFileProcess">
+                Send
+                <i class="send icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!--  Modal SendVideo  -->
+    <div class="ui small modal" id="modalSendVideo">
+        <i class="close icon"></i>
+        <div class="header">
+            Send Video
+        </div>
+        <div class="content">
+            <form class="ui form">
+                <div class="field">
+                    <label>Type</label>
+                    <select name="video_type" v-model="video_type" aria-label="type">
+                        <option value="group">Group Message</option>
+                        <option value="user">Private Message</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Phone / Group ID</label>
+                    <input v-model="video_phone" type="text" placeholder="6289..."
+                           aria-label="phone">
+                    <input :value="video_phone_id" disabled aria-label="whatsapp_id">
+                </div>
+                <div class="field">
+                    <label>Caption</label>
+                    <textarea v-model="video_caption" type="text" placeholder="Type some caption (optional)..."
+                              aria-label="caption"></textarea>
+                </div>
+                <div class="field">
+                    <label>View Once</label>
+                    <div class="ui toggle checkbox">
+                        <input type="checkbox" aria-label="view once" v-model="video_view_once">
+                        <label>Check for enable one time view</label>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Compress</label>
+                    <div class="ui toggle checkbox">
+                        <input type="checkbox" aria-label="compress" v-model="video_compress">
+                        <label>Check for compressing image to smaller size</label>
+                    </div>
+                </div>
+                <div class="field" style="padding-bottom: 30px">
+                    <label>Video</label>
+                    <input type="file" class="inputfile" id="video_file" style="display: none" accept="video/*"/>
+                    <label for="video_file" class="ui positive medium green left floated button" style="color: white">
+                        <i class="ui upload icon"></i>
+                        Upload video
+                    </label>
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui approve positive right labeled icon button" :class="{'loading': this.video_loading}"
+                 @click="sendVideoProcess">
+                Send
+                <i class="send icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!--  Modal SendContact  -->
+    <div class="ui small modal" id="modalSendContact">
+        <i class="close icon"></i>
+        <div class="header">
+            Send Contact
+        </div>
+        <div class="content">
+            <form class="ui form">
+                <div class="field">
+                    <label>Type</label>
+                    <select name="contact_type" v-model="contact_type" aria-label="type">
+                        <option value="group">Group Message</option>
+                        <option value="user">Private Message</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Phone / Group ID</label>
+                    <input v-model="contact_phone" type="text" placeholder="6289..."
+                           aria-label="phone">
+                    <input :value="contact_phone_id" disabled aria-label="whatsapp_id">
+                </div>
+                <div class="field">
+                    <label>Contact Name</label>
+                    <input v-model="contact_card_name" type="text" placeholder="Please enter contact name"
+                           aria-label="contact name">
+                </div>
+                <div class="field">
+                    <label>Contact Phone</label>
+                    <input v-model="contact_card_phone" type="text" placeholder="Please enter contact phone"
+                           aria-label="contact phone">
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui approve positive right labeled icon button" :class="{'loading': this.contact_loading}"
+                 @click="sendContactProcess">
+                Send
+                <i class="send icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!--  Modal SendLocation  -->
+    <div class="ui small modal" id="modalSendLocation">
+        <i class="close icon"></i>
+        <div class="header">
+            Send Location
+        </div>
+        <div class="content">
+            <form class="ui form">
+                <div class="field">
+                    <label>Type</label>
+                    <select name="location_type" v-model="location_type" aria-label="type">
+                        <option value="group">Group Message</option>
+                        <option value="user">Private Message</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Phone / Group ID</label>
+                    <input v-model="location_phone" type="text" placeholder="6289..."
+                           aria-label="phone">
+                    <input :value="location_phone_id" disabled aria-label="whatsapp_id">
+                </div>
+                <div class="field">
+                    <label>Location Latitude</label>
+                    <input v-model="location_latitude" type="text" placeholder="Please enter latitude"
+                           aria-label="latitude">
+                </div>
+                <div class="field">
+                    <label>Location Longitude</label>
+                    <input v-model="location_longitude" type="text" placeholder="Please enter longitude"
+                           aria-label="longitude">
+                </div>
+            </form>
+        </div>
+        <div class="actions">
+            <div class="ui approve positive right labeled icon button" :class="{'loading': this.location_loading}"
+                 @click="sendLocationProcess">
+                Send
+                <i class="send icon"></i>
+            </div>
+        </div>
+    </div>
+
+    <!--  Modal UserGroup  -->
+    <div class="ui small modal" id="modalUserGroup">
+        <i class="close icon"></i>
+        <div class="header">
+            My Group List
+        </div>
+        <div class="content">
+            <table class="ui celled table" id="user_groups_table">
+                <thead>
+                <tr>
+                    <th>Group ID</th>
+                    <th>Name</th>
+                    <th>Participants</th>
+                    <th>Created At</th>
+                </tr>
+                </thead>
+                <tbody v-if="data_groups != null">
+                <tr v-for="g in data_groups">
+                    <td>[[ g.JID.split('@')[0] ]]</td>
+                    <td>[[ g.Name ]]</td>
+                    <td>[[ g.Participants.length ]]</td>
+                    <td>[[ formatDate(g.GroupCreated) ]]</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!--  Modal UserPrivacy  -->
+    <div class="ui small modal" id="modalUserPrivacy">
+        <i class="close icon"></i>
+        <div class="header">
+            My Privacy
+        </div>
+        <div class="content">
+            <ol v-if="data_privacy != null">
+                <li>Who can add Group : <b>[[ data_privacy.group_add ]]</b></li>
+                <li>Who can see my Last Seen : <b>[[ data_privacy.last_seen ]]</b></li>
+                <li>Who can see my Status : <b>[[ data_privacy.status ]]</b></li>
+                <li>Who can see my Profile : <b>[[ data_privacy.profile ]]</b></li>
+                <li>Read Receipts : <b>[[ data_privacy.read_receipts ]]</b></li>
+            </ol>
+        </div>
+    </div>
+
+    <!--  Modal UserAvatar  -->
+    <div class="ui small modal" id="modalUserAvatar">
+        <i class="close icon"></i>
+        <div class="header">
+            Search User Avatar
+        </div>
+        <div class="content">
+            <form class="ui form">
+                <div class="field">
+                    <label>Type</label>
+                    <select name="avatar_type" v-model="avatar_type" aria-label="type">
+                        <option value="group">Group Message</option>
+                        <option value="user">Private Message</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Phone</label>
+                    <input v-model="avatar_phone" type="text" placeholder="6289..."
+                           aria-label="phone">
+                    <input :value="avatar_phone_id" disabled aria-label="whatsapp_id">
+                </div>
+
+                <div class="field">
+                    <label>Preview</label>
+                    <div class="ui toggle checkbox">
+                        <input type="checkbox" aria-label="compress" v-model="avatar_is_preview">
+                        <label>Check for small size image</label>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>Community</label>
+                    <div class="ui toggle checkbox">
+                        <input type="checkbox" aria-label="compress" v-model="avatar_is_community">
+                        <label>Check is it's community image</label>
+                    </div>
+                </div>
+
+                <button type="button" class="ui primary button" :class="{'loading': avatar_loading}"
+                        @click="avatarProcess">
+                    Search
+                </button>
+            </form>
+
+            <div v-if="avatar_image != null" class="center">
+                <img :src="avatar_image" alt="profile picture" style="padding-top: 10px; max-height: 200px">
+            </div>
+        </div>
+    </div>
+
+    <!--  Modal UserInfo  -->
+    <div class="ui small modal" id="modalUserInfo">
+        <i class="close icon"></i>
+        <div class="header">
+            Search User Information
+        </div>
+        <div class="content">
+            <form class="ui form">
+                <div class="field">
+                    <label>Type</label>
+                    <select name="info_type" v-model="info_type" aria-label="type">
+                        <option value="user">Private Message</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Phone</label>
+                    <input v-model="info_phone" type="text" placeholder="6289..."
+                           aria-label="phone">
+                    <input :value="info_phone_id" disabled aria-label="whatsapp_id">
+                </div>
+
+                <button type="button" class="ui primary button" :class="{'loading': info_loading}"
+                        @click="infoProcess">
+                    Search
+                </button>
+            </form>
+
+            <div v-if="info_devices.length > 0" class="center">
+                <ol>
+                    <li>Nama: [[ info_name ]]</li>
+                    <li>Status: [[ info_status ]]</li>
+                    <li>Device:
+                        <ul>
+                            <li v-for="d in info_devices">
+                                [[ d.Device ]]
+                            </li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-</div>
+
+<script>
+    const http = axios.create({
+        baseURL: {{ .AppHost }},
+        headers: {
+            token : {{ .Token }}
+        }
+    });
+    const showErrorInfo = (message) => {
+        $('body').toast({
+            position: 'bottom right',
+            title: 'Error',
+            message: message,
+            showProgress: 'bottom',
+            classProgress: 'red'
+        });
+    }
+    const showSuccessInfo = (message) => {
+        $('body').toast({
+            position: 'bottom right',
+            title: 'Success',
+            message: message,
+            showProgress: 'bottom',
+            classProgress: 'green'
+        });
+    }
+
+    const login = {
+        data() {
+            return {
+                login_link: '',
+                login_duration_sec: 0,
+                autoUpdateQRCode: null,
+            }
+        },
+        methods: {
+            async loginModal() {
+                try {
+                    await this.loginApiGetQrCode();
+                    $('#modalLogin').modal({
+                        onApprove: function () {
+                            return false;
+                        }
+                    }).modal('show');
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+            loginApiGetQrCode() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        let response = await http.get(`/app/login`)
+                        let results = response.data.results;
+                        this.login_link = results.qr_link;
+                        this.login_duration_sec = results.qr_duration;
+                        resolve()
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+    const logout = {
+        methods: {
+            async logoutProcess() {
+                try {
+                    await this.logoutApi()
+                    showSuccessInfo("Logout success")
+
+                    // fetch devices
+                    this.app_ws.send(JSON.stringify({"code": "FETCH_DEVICES"}))
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+
+            logoutApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        await http.get(`/app/logout`)
+                        resolve()
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+    const reconnect = {
+        methods: {
+            async reconnectProcess() {
+                try {
+                    await this.reconnectApi()
+                    showSuccessInfo("Reconnect success")
+                    // fetch devices
+                    this.app_ws.send(JSON.stringify({"code": "FETCH_DEVICES"}))
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+
+            reconnectApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        await http.get(`/app/reconnect`)
+                        resolve()
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+    const sendMessage = {
+        data() {
+            return {
+                message_type: 'user',
+                message_phone: '',
+                message_text: '',
+                message_loading: false,
+            }
+        },
+        computed: {
+            message_phone_id() {
+                return this.message_type === 'user' ? `${this.message_phone}@${this.type_user}` : `${this.message_phone}@${this.type_group}`
+            }
+        },
+        methods: {
+            sendMessageModal() {
+                $('#modalSendMessage').modal({
+                    onApprove: function () {
+                        return false;
+                    }
+                }).modal('show');
+            },
+            async sendMessageProcess() {
+                try {
+                    let response = await this.sendMessageApi()
+                    showSuccessInfo(response)
+                    $('#modalSendMessage').modal('hide');
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+            sendMessageApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        this.message_loading = true;
+                        const data = JSON.stringify({
+                            "Phone": this.message_phone_id,
+                            "Body": this.message_text
+                        });
+                        let response = await http.post(`/chat/send/text`, data)
+                        this.sendMessageReset();
+                        resolve(response.data.data.Details)
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    } finally {
+                        this.message_loading = false;
+                    }
+                })
+            },
+            sendMessageReset() {
+                this.message_phone = '';
+                this.message_text = '';
+                this.message_type = 'user';
+            },
+        }
+    }
+
+    const sendImage = {
+        data() {
+            return {
+                image_phone: '',
+                image_view_once: false,
+                image_compress: false,
+                image_caption: '',
+                image_type: 'user',
+                image_loading: false,
+            }
+        },
+        computed: {
+            image_phone_id() {
+                return this.image_type === 'user' ? `${this.image_phone}@${this.type_user}` : `${this.image_phone}@${this.type_group}`
+            }
+        },
+        methods: {
+            sendImageModal() {
+                $('#modalSendImage').modal({
+                    onApprove: function () {
+                        return false;
+                    }
+                }).modal('show');
+            },
+            async sendImageProcess() {
+                try {
+                    let response = await this.sendImageApi()
+                    showSuccessInfo(response)
+                    $('#modalSendImage').modal('hide');
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+            sendImageApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        this.image_loading = true;
+                        let payload = new FormData();
+                        payload.append("phone", this.image_phone_id)
+                        payload.append("view_once", this.image_view_once)
+                        payload.append("compress", this.image_compress)
+                        payload.append("caption", this.image_caption)
+                        payload.append("image", $("#image_file")[0].files[0])
+                        let response = await http.post(`/send/image`, payload)
+                        this.sendImageReset();
+                        resolve(response.data.message)
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    } finally {
+                        this.image_loading = false;
+                    }
+                })
+            },
+            sendImageReset() {
+                this.image_view_once = false;
+                this.image_compress = false;
+                this.image_phone = '';
+                this.image_caption = '';
+                this.image_type = 'user';
+                $("#image_file").val('');
+            },
+        }
+    }
+
+    const sendFile = {
+        data() {
+            return {
+                file_caption: '',
+                file_type: 'user',
+                file_phone: '',
+                file_loading: false,
+            }
+        },
+        computed: {
+            file_phone_id() {
+                return this.file_type === 'user' ? `${this.file_phone}@${this.type_user}` : `${this.file_phone}@${this.type_group}`
+            }
+        },
+        methods: {
+            sendFileModal() {
+                $('#modalSendFile').modal({
+                    onApprove: function () {
+                        return false;
+                    }
+                }).modal('show');
+            },
+            async sendFileProcess() {
+                try {
+                    let response = await this.sendFileApi()
+                    showSuccessInfo(response)
+                    $('#modalSendFile').modal('hide');
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+            sendFileApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        this.file_loading = true;
+                        let payload = new FormData();
+                        payload.append("caption", this.file_caption)
+                        payload.append("phone", this.file_phone_id)
+                        payload.append("file", $("#file_file")[0].files[0])
+                        let response = await http.post(`/send/file`, payload)
+                        this.sendFileReset();
+                        resolve(response.data.message)
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    } finally {
+                        this.file_loading = false;
+                    }
+                })
+            },
+            sendFileReset() {
+                this.file_caption = '';
+                this.file_phone = '';
+                this.file_type = 'user';
+                $("#file_file").val('');
+            },
+        }
+    }
+
+    const sendVideo = {
+        data() {
+            return {
+                video_caption: '',
+                video_view_once: false,
+                video_compress: false,
+                video_type: 'user',
+                video_phone: '',
+                video_loading: false,
+            }
+        },
+        computed: {
+            video_phone_id() {
+                return this.video_type === 'user' ? `${this.video_phone}@${this.type_user}` : `${this.video_phone}@${this.type_group}`
+            }
+        },
+        methods: {
+            sendVideoModal() {
+                $('#modalSendVideo').modal({
+                    onApprove: function () {
+                        return false;
+                    }
+                }).modal('show');
+            },
+            async sendVideoProcess() {
+                try {
+                    let response = await this.sendVideoApi()
+                    showSuccessInfo(response)
+                    $('#modalSendVideo').modal('hide');
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+            sendVideoApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        this.video_loading = true;
+                        let payload = new FormData();
+                        payload.append("phone", this.video_phone_id)
+                        payload.append("caption", this.video_caption)
+                        payload.append("view_once", this.video_view_once)
+                        payload.append("compress", this.video_compress)
+                        payload.append("video", $("#video_file")[0].files[0])
+                        let response = await http.post(`/send/video`, payload)
+                        this.sendVideoReset();
+                        resolve(response.data.message)
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    } finally {
+                        this.video_loading = false;
+                    }
+                })
+            },
+            sendVideoReset() {
+                this.video_caption = '';
+                this.video_view_once = false;
+                this.video_compress = false;
+                this.video_phone = '';
+                this.video_type = 'user';
+                $("#video_file").val('');
+            },
+        }
+    }
+
+    const sendContact = {
+        data() {
+            return {
+                contact_type: 'user',
+                contact_phone: '',
+                contact_card_name: '',
+                contact_card_phone: '',
+                contact_loading: false,
+            }
+        },
+        computed: {
+            contact_phone_id() {
+                return this.contact_type === 'user' ? `${this.contact_phone}@${this.type_user}` : `${this.contact_phone}@${this.type_group}`
+            }
+        },
+        methods: {
+            sendContactModal() {
+                $('#modalSendContact').modal({
+                    onApprove: function () {
+                        return false;
+                    }
+                }).modal('show');
+            },
+            async sendContactProcess() {
+                try {
+                    this.contact_loading = true;
+                    let response = await this.sendContactApi()
+                    showSuccessInfo(response)
+                    $('#modalSendContact').modal('hide');
+                } catch (err) {
+                    showErrorInfo(err)
+                } finally {
+                    this.contact_loading = false;
+                }
+            },
+            sendContactApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        let payload = new FormData();
+                        payload.append("phone", this.contact_phone_id)
+                        payload.append("contact_name", this.contact_card_name)
+                        payload.append("contact_phone", this.contact_card_phone)
+                        let response = await http.post(`/send/contact`, payload)
+                        this.sendContactReset();
+                        resolve(response.data.message)
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    }
+                })
+            },
+            sendContactReset() {
+                this.contact_phone = '';
+                this.contact_card_name = '';
+                this.contact_card_phone = '';
+                this.contact_type = 'user';
+            },
+        }
+    }
+
+    const messageRevoke = {
+        data() {
+            return {
+                revoke_type: 'user',
+                revoke_phone: '',
+                revoke_message_id: '',
+                revoke_loading: false,
+            }
+        },
+        computed: {
+            revoke_phone_id() {
+                return this.revoke_type === 'user' ? `${this.revoke_phone}@${this.type_user}` : `${this.revoke_phone}@${this.type_group}`
+            }
+        },
+        methods: {
+            messageRevokeModal() {
+                $('#modalMessageRevoke').modal({
+                    onApprove: function () {
+                        return false;
+                    }
+                }).modal('show');
+            },
+            async messageRevokeProcess() {
+                try {
+                    let response = await this.messageRevokeApi()
+                    showSuccessInfo(response)
+                    $('#modalMessageRevoke').modal('hide');
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+            messageRevokeApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        this.revoke_loading = true;
+                        let payload = new FormData();
+                        payload.append("phone", this.revoke_phone_id)
+                        let response = await http.post(`/message/${this.revoke_message_id}/revoke`, payload)
+                        this.messageRevokeReset();
+                        resolve(response.data.message)
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    } finally {
+                        this.revoke_loading = false;
+                    }
+                })
+            },
+            messageRevokeReset() {
+                this.revoke_phone = '';
+                this.revoke_message_id = '';
+                this.revoke_type = 'user';
+            },
+        }
+    }
+
+    const messageReact = {
+        data() {
+            return {
+                react_type: 'user',
+                react_phone: '',
+                react_message_id: '',
+                react_emoji: '',
+                react_loading: false,
+            }
+        },
+        computed: {
+            react_phone_id() {
+                return this.react_type === 'user' ? `${this.react_phone}@${this.type_user}` : `${this.react_phone}@${this.type_group}`
+            }
+        },
+        methods: {
+            messageReactModal() {
+                $('#modalMessageReaction').modal({
+                    onApprove: function () {
+                        return false;
+                    }
+                }).modal('show');
+            },
+            async messageReactProcess() {
+                try {
+                    let response = await this.messageReactApi()
+                    showSuccessInfo(response)
+                    $('#modalMessageReaction').modal('hide');
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+            messageReactApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        this.react_loading = true;
+                        let payload = new FormData();
+                        payload.append("phone", this.react_phone_id)
+                        payload.append("emoji", this.react_emoji)
+                        let response = await http.post(`/message/${this.react_message_id}/reaction`, payload)
+                        this.messageReactReset();
+                        resolve(response.data.message)
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    } finally {
+                        this.react_loading = false;
+                    }
+                })
+            },
+            messageReactReset() {
+                this.react_phone = '';
+                this.react_message_id = '';
+                this.react_emoji = '';
+                this.react_type = 'user';
+            },
+        }
+    }
+
+    const sendLocation = {
+        data() {
+            return {
+                location_type: 'user',
+                location_phone: '',
+                location_latitude: '',
+                location_longitude: '',
+                location_loading: false,
+            }
+        },
+        computed: {
+            location_phone_id() {
+                return this.location_type === 'user' ? `${this.location_phone}@${this.type_user}` : `${this.location_phone}@${this.type_group}`
+            }
+        },
+        methods: {
+            sendLocationModal() {
+                $('#modalSendLocation').modal({
+                    onApprove: function () {
+                        return false;
+                    }
+                }).modal('show');
+            },
+            async sendLocationProcess() {
+                try {
+                    let response = await this.sendLocationApi()
+                    showSuccessInfo(response)
+                    $('#modalSendLocation').modal('hide');
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+            sendLocationApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        this.location_loading = true;
+                        let payload = new FormData();
+                        payload.append("phone", this.location_phone_id)
+                        payload.append("latitude", this.location_latitude)
+                        payload.append("longitude", this.location_longitude)
+                        let response = await http.post(`/send/location`, payload)
+                        this.sendLocationReset();
+                        resolve(response.data.message)
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    } finally {
+                        this.location_loading = false;
+                    }
+                })
+            },
+            sendLocationReset() {
+                this.location_phone = '';
+                this.location_latitude = '';
+                this.location_longitude = '';
+                this.location_type = 'user';
+            },
+        }
+    }
+
+    const userGroups = {
+        data() {
+            return {
+                data_groups: []
+            }
+        },
+        methods: {
+            async groupModal() {
+                try {
+                    await this.groupApi();
+                    $('#modalUserGroup').modal('show');
+                    $('#user_groups_table').DataTable().destroy();
+                    $('#user_groups_table').DataTable({
+                        "pageLength": 100,
+                    });
+                    showSuccessInfo("Groups fetched")
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+            groupApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        let response = await http.get(`/user/my/groups`)
+                        this.data_groups = response.data.results.data;
+                        resolve()
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+    const userPrivacy = {
+        data() {
+            return {
+                data_privacy: null
+            }
+        },
+        methods: {
+            async privacyModal() {
+                try {
+                    await this.privacyApi();
+                    $('#modalUserPrivacy').modal('show');
+                    showSuccessInfo("Privacy fetched")
+                } catch (err) {
+                    showErrorInfo(err)
+                }
+            },
+            privacyApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        let response = await http.get(`/user/my/privacy`)
+                        this.data_privacy = response.data.results;
+                        resolve()
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    }
+                })
+            }
+        }
+    }
+
+    const userAvatar = {
+        data() {
+            return {
+                avatar_type: 'user',
+                avatar_phone: '',
+                avatar_image: null,
+                avatar_loading: false,
+                avatar_is_preview: false,
+                avatar_is_community: false,
+            }
+        },
+        computed: {
+            avatar_phone_id() {
+                return this.avatar_type === 'user' ? `${this.avatar_phone}@${this.type_user}` : `${this.avatar_phone}@${this.type_group}`
+            }
+        },
+        methods: {
+            async avatarModal() {
+                this.avatarReset();
+                $('#modalUserAvatar').modal('show');
+            },
+            async avatarProcess() {
+                try {
+                    this.avatar_loading = true;
+                    await this.avatarApi();
+                    this.avatar_loading = false;
+                    showSuccessInfo("Avatar fetched")
+                } catch (err) {
+                    this.avatar_loading = false;
+                    showErrorInfo(err)
+                }
+            },
+            avatarApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        let response = await http.get(`/user/avatar?phone=${this.avatar_phone_id}&is_preview=${this.avatar_is_preview}&is_community=${this.avatar_is_community}`)
+                        this.avatar_image = response.data.results.url;
+                        resolve()
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    }
+                })
+            },
+            avatarReset() {
+                this.avatar_phone = '';
+                this.avatar_image = null;
+                this.avatar_type = 'user';
+            }
+        }
+    }
+
+    const userInfo = {
+        data() {
+            return {
+                info_type: 'user',
+                info_phone: '',
+                //
+                info_name: null,
+                info_status: null,
+                info_devices: [],
+                //
+                info_loading: false,
+            }
+        },
+
+        computed: {
+            info_phone_id() {
+                return this.info_type === 'user' ? `${this.info_phone}@${this.type_user}` : `${this.info_phone}@${this.type_group}`
+            }
+        },
+        methods: {
+            async infoModal() {
+                this.infoReset();
+                $('#modalUserInfo').modal('show');
+            },
+            async infoProcess() {
+                try {
+                    this.info_loading = true;
+                    await this.infoApi();
+                    this.info_loading = false;
+                    showSuccessInfo("Info fetched")
+                } catch (err) {
+                    this.info_loading = false;
+                    showErrorInfo(err)
+                }
+            },
+            infoApi() {
+                return new Promise(async (resolve, reject) => {
+                    try {
+                        let response = await http.get(`/user/info?phone=${this.info_phone_id}`)
+                        this.info_name = response.data.results.verified_name;
+                        this.info_status = response.data.results.status;
+                        this.info_devices = response.data.results.devices;
+                        resolve()
+                    } catch (error) {
+                        if (error.response) {
+                            reject(error.response.data.message)
+                        } else {
+                            reject(error.message)
+                        }
+                    }
+                })
+            },
+            infoReset() {
+                this.info_phone = '';
+                this.info_name = null;
+                this.info_status = null;
+                this.info_devices = [];
+                this.info_type = 'user';
+            }
+        }
+    }
+
+    Vue.createApp({
+        delimiters: ['[[', ']]'],
+        data() {
+            return {
+                app_ws: null,
+                app_host: {{ .AppHost }},
+            app_name: 'Whatsapp API Multi Device ({{ .AppVersion }})',
+                is_logged_in: false,
+                connected_devices: null,
+                type_group: "g.us",
+                type_user: "s.whatsapp.net"
+        }
+        },
+        mounted() {
+            if (window["WebSocket"]) {
+                let wsType = location.protocol !== 'https:' ? 'ws://' : 'wss://';
+                this.app_ws = new WebSocket(wsType + document.location.host + "/ws");
+
+                this.app_ws.onopen = (evt) => {
+                    this.app_ws.send(JSON.stringify({
+                        "code": "FETCH_DEVICES",
+                        "message": "List device"
+                    }))
+                };
+
+                this.app_ws.onmessage = (evt) => {
+                    const message = JSON.parse(evt.data)
+                    switch (message.code) {
+                        case 'LOGIN_SUCCESS':
+                            showSuccessInfo(message.message)
+                            $('#modalLogin').modal('hide');
+
+                            // fetch devices
+                            this.app_ws.send(JSON.stringify({"code": "FETCH_DEVICES"}))
+                            break;
+                        case 'LIST_DEVICES':
+                            this.connected_devices = message.result
+                            break;
+                        default:
+                            console.log(message)
+                    }
+                };
+            } else {
+                console.error('Your browser does not support WebSockets');
+            }
+        },
+        methods: {
+            formatDate: function (value) {
+                if (!value) return ''
+                const tanggal = moment(value)
+                return tanggal.format('LLL');
+            }
+        },
+        mixins: [
+            login, logout, reconnect,
+            sendMessage, sendImage, sendFile, sendVideo, sendContact, sendLocation,
+            messageRevoke, messageReact,
+            userGroups, userPrivacy, userAvatar, userInfo
+        ]
+    }).mount('#app')
+</script>
+</body>
+</html>

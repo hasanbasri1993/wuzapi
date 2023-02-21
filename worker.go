@@ -44,6 +44,7 @@ type deliveries struct {
 }
 
 func worker() {
+	fmt.Println("Worker started " + time.Now().Format("2006-01-02 15:04:05"))
 	db, err := sql.Open("sqlite", "./dbdata/deliveries.db")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Could not open/create ./dbdata/deliveries.db")
@@ -61,17 +62,22 @@ func worker() {
 		max := 5
 		randSend := rand.Intn(max-min) + min
 		fmt.Println()
-		rows, err := db.Query("SELECT id, jid, message_type, content, attachment, attachment_name, is_group FROM deliveries WHERE delivery_status = 'pending' ORDER BY priority")
+		rows, err := db.Query("SELECT id, jid, message_id, message_type, content, attachment, attachment_name, is_group FROM deliveries WHERE delivery_status = 'pending' ORDER BY priority")
 		if err != nil {
 			return
 		}
-		defer rows.Close()
+		defer func(rows *sql.Rows) {
+			err := rows.Close()
+			if err != nil {
+				log.Error().Msg(err.Error())
+			}
+		}(rows)
 
 		var result []deliveries
 
 		for rows.Next() {
 			var each = deliveries{}
-			var err = rows.Scan(&each.id, &each.jid, &each.message_type, &each.content, &each.attachment, &each.attachment_name, &each.is_group)
+			var err = rows.Scan(&each.id, &each.jid, &each.message_id, &each.message_type, &each.content, &each.attachment, &each.attachment_name, &each.is_group)
 			if err != nil {
 				fmt.Println(err.Error())
 				return
@@ -83,17 +89,17 @@ func worker() {
 			fmt.Println(err.Error())
 			return
 		}
-		now := time.Now()
+		now := time.Now().Format("2006-01-02 15:04:05")
 
 		if len(result) == 0 {
-			fmt.Println("No pending message " + now.Format("2006-01-02 15:04:05"))
+			fmt.Println("No pending message " + now)
 		} else {
-			fmt.Println("Pending message: ", len(result), now.Format("2006-01-02 15:04:05"))
+			fmt.Println("Pending message: ", len(result), now)
 			i := 0
 			switch result[i].message_type {
 			case "text":
 				time.Sleep(time.Duration(randSend) * time.Second)
-				kode, respond, msgid := SendMessageProcess(result[i].jid, result[i].content, 1, nil, nil)
+				kode, respond := SendMessageProcess(result[i].jid, result[i].message_id, result[i].content, 1, nil, nil)
 				if viper.GetString("chatwoot.baseUrl") != "" && kode == http.StatusOK {
 					isGroup := strings.Contains(result[i].jid, "@g.us")
 					chat := result[i].jid
@@ -108,12 +114,11 @@ func worker() {
 					oneSenderWebhook.MessageType = "text"
 					oneSenderWebhook.IsFromMe = true
 					oneSenderWebhook.IsGroup = isGroup
-					oneSenderWebhook.MessageID = msgid
+					oneSenderWebhook.MessageID = result[i].message_id
 					Chatwoot.IncomingMessageApi(oneSenderWebhook)
 				}
 				if kode == 200 {
-					now := time.Now()
-					_, err = db.Exec("UPDATE deliveries SET message_id=?,delivery_status=?, updated_at=? WHERE id=?", msgid, "sent", now, result[i].id)
+					_, err = db.Exec("UPDATE deliveries SET delivery_status=?, updated_at=? WHERE id=?", "sent", now, result[i].id)
 					if err != nil {
 						fmt.Println(err.Error())
 						return
@@ -140,9 +145,13 @@ func receipt(id string, status string, timestamp time.Time) {
 			log.Error().Msg(err.Error())
 		}
 	}(db)
-	_, err = db.Exec("UPDATE deliveries SET delivery_status=? WHERE message_id=?", status, id)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
+	now := time.Now().Format("2006-01-02 15:04:05")
+	switch status {
+	case "delivered":
+		_, _ = db.Exec("UPDATE deliveries SET delivery_status=?, delivered_at=?, updated_at=? WHERE message_id=?", status, now, now, id)
+		break
+	case "read":
+		_, _ = db.Exec("UPDATE deliveries SET delivery_status=?, read_at=?, updated_at=? WHERE message_id=?", status, now, now, id)
+		break
 	}
 }

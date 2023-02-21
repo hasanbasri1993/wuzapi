@@ -46,12 +46,12 @@ func OutcomeChawoot(t model.ChatwootWebhook) string {
 					return ""
 				}
 				base64File := fileBase64(fileName)
-				SendImageProses(to, contentAttach, base64File, 1, nil, nil)
+				SendImageProses(to, "", contentAttach, base64File, 1, nil, nil)
 				break
 			}
 		}
 	} else {
-		SendMessageProcess(to, content, 1, nil, nil)
+		SendMessageProcess(to, "", content, 1, nil, nil)
 	}
 
 	return "chatwoot service is running"

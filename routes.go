@@ -23,6 +23,8 @@ func (s *server) routes() {
 
 	c := alice.New()
 	s.router.Handle("/chatwoot", c.Then(s.Chatwoot())).Methods("POST")
+	s.router.Handle("/", s.GetIndex()).Methods("GET")
+	s.router.Handle("/api", s.GetApi()).Methods("GET")
 
 	c = c.Append(s.authalice)
 	c = c.Append(hlog.NewHandler(log))

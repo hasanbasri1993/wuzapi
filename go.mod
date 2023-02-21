@@ -3,6 +3,8 @@ module wuzapi
 go 1.18
 
 require (
+	github.com/dustin/go-humanize v1.0.0
+	github.com/gabriel-vasile/mimetype v1.4.1
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/justinas/alice v1.2.0
@@ -12,7 +14,7 @@ require (
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/viper v1.15.0
 	github.com/vincent-petithory/dataurl v1.0.0
-	go.mau.fi/whatsmeow v0.0.0-20230204181151-b1f00ea99464
+	go.mau.fi/whatsmeow v0.0.0-20230219203712-2c9e6d0c4afd
 	google.golang.org/protobuf v1.28.1
 	modernc.org/sqlite v1.16.0
 )
@@ -20,7 +22,6 @@ require (
 require (
 	filippo.io/edwards25519 v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.1 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect

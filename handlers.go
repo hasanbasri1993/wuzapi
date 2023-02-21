@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/dustin/go-humanize"
 	"github.com/patrickmn/go-cache"
 	"github.com/spf13/viper"
 	"github.com/vincent-petithory/dataurl"
@@ -13,8 +14,10 @@ import (
 	waProto "go.mau.fi/whatsmeow/binary/proto"
 	"go.mau.fi/whatsmeow/types"
 	"google.golang.org/protobuf/proto"
+	"html/template"
 	"net/http"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -539,6 +542,55 @@ func (s *server) GetStatus() http.HandlerFunc {
 	}
 }
 
+// GetIndex Gets Connected and LoggedIn Status
+func (s *server) GetIndex() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var filepath = path.Join("static", "index.html")
+		var tmpl, err = template.ParseFiles(filepath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		var data = map[string]interface{}{
+			"AppHost":        viper.GetString("app.host"),
+			"AppVersion":     1.325,
+			"BasicAuthToken": "sd asd asdasdasd",
+			"Token":          "hjve6uly",
+			"MaxFileSize":    humanize.Bytes(uint64(50000000)),
+			"MaxVideoSize":   humanize.Bytes(uint64(100000000)),
+		}
+
+		err = tmpl.Execute(w, data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+	}
+}
+
+// GetApi Gets Connected and LoggedIn Status
+func (s *server) GetApi() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var filepath = path.Join("static", "api.html")
+		var tmpl, err = template.ParseFiles(filepath)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		var data = map[string]interface{}{
+			"UrlPath": "/api",
+		}
+
+		err = tmpl.Execute(w, data)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		return
+
+	}
+}
+
 // Sends a document/attachment message
 func (s *server) SendDocument() http.HandlerFunc {
 
@@ -805,7 +857,7 @@ func (s *server) SendImage() http.HandlerFunc {
 			s.Respond(w, r, http.StatusBadRequest, errors.New("Missing Image in Payload"))
 			return
 		}
-		kode, respon, msgid := SendImageProses(t.Phone, t.Caption, t.Image, userid, t.ContextInfo.StanzaId, t.ContextInfo.Participant)
+		kode, respon, msgid := SendImageProses(t.Phone, "", t.Caption, t.Image, userid, t.ContextInfo.StanzaId, t.ContextInfo.Participant)
 		if viper.GetString("chatwoot.baseUrl") != "" && kode == http.StatusOK {
 			isGroup := strings.Contains(t.Phone, "@g.us")
 			chat := t.Phone
@@ -1522,7 +1574,7 @@ func (s *server) SendMessage() http.HandlerFunc {
 			t.Priority = 100
 		}
 
-		wamd.AddSendMessageText(t.Phone, t.Body, t.Priority)
+		wamd.AddSendMessage(t.Phone, t.Body, t.Priority)
 		response := map[string]interface{}{"Details": "Add to queue"}
 		responseJson, _ := json.Marshal(response)
 		s.Respond(w, r, http.StatusOK, string(responseJson))
